@@ -1,11 +1,19 @@
 import "./App.css";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 function App() {
   return (
-    <div className='App'>
-      <Header />
-      <div className='main'>hi</div>
-    </div>
+    <Router>
+      <div className='App'>
+        <Header />
+        <div className='main'>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/about" element={<About />} />
+          </Routes>
+        </div>
+      </div>
+    </Router>
   );
 }
 
@@ -26,6 +34,14 @@ function Header() {
       />
     </header>
   );
+}
+
+function Home() {
+  return <div>Home Page</div>;
+}
+
+function About() {
+  return <div>About Page</div>;
 }
 
 export default App;
