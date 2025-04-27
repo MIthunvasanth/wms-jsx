@@ -1,5 +1,8 @@
 import "./App.css";
+import Home from './component/home';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import AddMachine from './component/addMachine';
+import AddComponent from './component/addComponent';
 
 function App() {
   return (
@@ -9,7 +12,6 @@ function App() {
         <div className='main'>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
           </Routes>
         </div>
       </div>
@@ -36,9 +38,7 @@ function Header() {
   );
 }
 
-function Home() {
-  return <div>Home Page</div>;
-}
+
 
 function About() {
   return <div>About Page</div>;

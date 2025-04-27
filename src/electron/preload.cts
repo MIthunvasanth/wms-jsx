@@ -1,6 +1,20 @@
-const electron = require('electron');
+import { contextBridge, ipcRenderer } from 'electron'; // Correct import
 
-electron.contextBridge.exposeInMainWorld('electron', {
+// Expose 'machineAPI' to the renderer process
+console.log('Preload script loaded');
+contextBridge.exposeInMainWorld('machineAPI', {
+  saveMachine: (machineName: string) => ipcRenderer.invoke('save-machine', machineName),
+  loadMachines: () => ipcRenderer.invoke('load-machines'), 
+
+});
+
+contextBridge.exposeInMainWorld('componentAPI', {
+  saveComponent: (componentData:any) => ipcRenderer.invoke('save-component', componentData),
+});
+
+
+// Expose 'electron' API for other purposes
+contextBridge.exposeInMainWorld('electron', {
   subscribeStatistics: (callback) =>
     ipcOn('statistics', (stats) => {
       callback(stats);
@@ -13,10 +27,11 @@ electron.contextBridge.exposeInMainWorld('electron', {
   sendFrameAction: (payload) => ipcSend('sendFrameAction', payload),
 } satisfies Window['electron']);
 
+// IPC utility functions
 function ipcInvoke<Key extends keyof EventPayloadMapping>(
   key: Key
 ): Promise<EventPayloadMapping[Key]> {
-  return electron.ipcRenderer.invoke(key);
+  return ipcRenderer.invoke(key); // Corrected to use ipcRenderer directly
 }
 
 function ipcOn<Key extends keyof EventPayloadMapping>(
@@ -24,13 +39,13 @@ function ipcOn<Key extends keyof EventPayloadMapping>(
   callback: (payload: EventPayloadMapping[Key]) => void
 ) {
   const cb = (_: Electron.IpcRendererEvent, payload: any) => callback(payload);
-  electron.ipcRenderer.on(key, cb);
-  return () => electron.ipcRenderer.off(key, cb);
+  ipcRenderer.on(key, cb);
+  return () => ipcRenderer.off(key, cb); // Corrected to use ipcRenderer directly
 }
 
 function ipcSend<Key extends keyof EventPayloadMapping>(
   key: Key,
   payload: EventPayloadMapping[Key]
 ) {
-  electron.ipcRenderer.send(key, payload);
+  ipcRenderer.send(key, payload); // Corrected to use ipcRenderer directly
 }

@@ -8,7 +8,6 @@ header {
 }
 
 header button {
-  all: unset;
   border-radius: 50%;
   width: 1rem;
   height: 1rem;
@@ -29,12 +28,10 @@ header button {
 }
 
 .main {
-  display: grid;
-  grid-template-columns: 16rem auto;
-  gap: 1rem;
+  width: 100%;
+
   align-items: center;
   margin: 1rem;
-  max-width: 900px;
   margin: auto;
   margin-top: 4rem;
 }
