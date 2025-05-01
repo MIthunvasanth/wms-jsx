@@ -1,47 +1,64 @@
 import "./App.css";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import AddMachine from "./component/addMachine";
+import AddComponent from "./component/addComponent";
 
 function App() {
   return (
     <Router>
       <div className='App'>
-        <Header />
-        <div className='main'>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-          </Routes>
+        <Sidebar />
+        <div className='right-section'>
+          <Header />
+          <div className='main-content'>
+            <Routes>
+              <Route path='/add-machine' element={<AddMachine />} />
+              <Route path='/add-component' element={<AddComponent />} />
+            </Routes>
+          </div>
         </div>
       </div>
     </Router>
   );
 }
 
-function Header() {
+function Sidebar() {
   return (
-    <header>
-      <button
-        id='minimize'
-        onClick={() => window.electron.sendFrameAction("MINIMIZE")}
-      />
-      <button
-        id='maximize'
-        onClick={() => window.electron.sendFrameAction("MAXIMIZE")}
-      />
-      <button
-        id='close'
-        onClick={() => window.electron.sendFrameAction("CLOSE")}
-      />
-    </header>
+    <div className='sidebar'>
+      <h2>Dashboard</h2>
+      <Link to='/add-machine' className='sidebar-link'>
+        Add Machine
+      </Link>
+      <Link to='/add-component' className='sidebar-link'>
+        Add Component
+      </Link>
+    </div>
   );
 }
 
-function Home() {
-  return <div>Home Page</div>;
-}
-
-function About() {
-  return <div>About Page</div>;
+function Header() {
+  return (
+    <div className='header'>
+      <button
+        className='header-button'
+        onClick={() => window.electron.sendFrameAction("MINIMIZE")}
+      >
+        _
+      </button>
+      <button
+        className='header-button'
+        onClick={() => window.electron.sendFrameAction("MAXIMIZE")}
+      >
+        □
+      </button>
+      <button
+        className='header-button'
+        onClick={() => window.electron.sendFrameAction("CLOSE")}
+      >
+        ✕
+      </button>
+    </div>
+  );
 }
 
 export default App;
