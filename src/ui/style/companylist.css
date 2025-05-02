@@ -1,0 +1,38 @@
+.company-list {
+  display: grid;
+  gap: 10px;
+  overflow-x: hidden  ;
+}
+
+.company-card {
+  height: 200px;
+  color: black;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out;
+  max-width: 50%;
+}
+
+.company-card:hover {
+  transform: translateY(-5px);
+}
+
+.company-card h2 {
+  margin-top: 0;
+  color: #2c3e50;
+}
+
+.machine-section {
+  margin-top: 15px;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.machine-item {
+  background-color: #f9f9f9;
+  padding: 8px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+}

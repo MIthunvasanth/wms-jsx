@@ -11,15 +11,14 @@ console.log('MACHINES FILE PATH:', machinesFilePath);
 function readMachines() {
   try {
     const data = fs.readFileSync(machinesFilePath, 'utf-8');
-    return JSON.parse(data); // Parse the JSON content into a JavaScript object
+    return JSON.parse(data); 
   } catch (error) {
-    // If the file doesn't exist or is empty, return an empty array
     return [];
   }
 }
 
 // Function to save machines to the JSON file
-function saveMachines(machines: string[]) {
+function saveMachines(machines: any) {
   try {
     fs.writeFileSync(machinesFilePath, JSON.stringify(machines, null, 2));
   } catch (error) {
@@ -35,7 +34,14 @@ function readComponents() {
     return []; // if file missing or empty
   }
 }
-
+function readCompanydetails() {
+  try {
+    const data = fs.readFileSync(machinesFilePath, 'utf-8');
+    return JSON.parse(data);
+  } catch (error) {
+    return []; // if file missing or empty
+  }
+}
 // Function to save components
 function saveComponents(components: any[]) {
   try {
@@ -105,9 +111,11 @@ function handleCloseEvents(mainWindow: BrowserWindow) {
   });
 }
 
-  ipcMain.handle('save-machine', (event, machineName: string) => {
+  ipcMain.handle('save-machine', (event, machine:any) => {
+    console.log(machine);
+    
     const machines = readMachines(); // Get the current list of machines
-    machines.push(machineName); // Add the new machine name
+    machines.push(machine); // Add the new machine name
     saveMachines(machines); // Save the updated list back to the JSON file
   });
 
@@ -115,7 +123,10 @@ function handleCloseEvents(mainWindow: BrowserWindow) {
     const machines = readMachines();
     return machines; // Send the list back
   });
-
+  ipcMain.handle('get-companies', () => {
+    const components = readCompanydetails();
+    return components;
+  });
   ipcMain.handle('save-component', (event, componentData) => {
     const components = readComponents();
   

@@ -3,9 +3,9 @@ import { contextBridge, ipcRenderer } from 'electron'; // Correct import
 // Expose 'machineAPI' to the renderer process
 console.log('Preload script loaded');
 contextBridge.exposeInMainWorld('machineAPI', {
-  saveMachine: (machineName: string) => ipcRenderer.invoke('save-machine', machineName),
+  saveMachine: (machine:any) => ipcRenderer.invoke('save-machine',machine),
   loadMachines: () => ipcRenderer.invoke('load-machines'), 
-
+  getCompanies: () => ipcRenderer.invoke('get-companies'),
 });
 
 contextBridge.exposeInMainWorld('componentAPI', {

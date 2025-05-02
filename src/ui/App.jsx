@@ -2,18 +2,21 @@ import "./App.css";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import AddMachine from "./component/addMachine";
 import AddComponent from "./component/addComponent";
+import CompanyList from "./component/Comapnylist";
 
 function App() {
   return (
     <Router>
       <div className='App'>
-        <Sidebar />
+        <Header />
+
         <div className='right-section'>
-          <Header />
+          <Sidebar />
           <div className='main-content'>
             <Routes>
               <Route path='/add-machine' element={<AddMachine />} />
               <Route path='/add-component' element={<AddComponent />} />
+              <Route path='/list-comapany' element={<CompanyList />} />
             </Routes>
           </div>
         </div>
@@ -25,12 +28,15 @@ function App() {
 function Sidebar() {
   return (
     <div className='sidebar'>
-      <h2>Dashboard</h2>
+      <h2>PROCESS SCHEDULER</h2>
       <Link to='/add-machine' className='sidebar-link'>
-        Add Machine
+        ADD PROCESS
       </Link>
-      <Link to='/add-component' className='sidebar-link'>
+      {/* <Link to='/add-component' className='sidebar-link'>
         Add Component
+      </Link> */}
+      <Link to='/list-comapany' className='sidebar-link'>
+        PROCESS LIST
       </Link>
     </div>
   );
