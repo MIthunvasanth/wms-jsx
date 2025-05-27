@@ -3,20 +3,24 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import AddMachine from "./component/addMachine";
 import AddComponent from "./component/addComponent";
 import CompanyList from "./component/Comapnylist";
-
+import WeeklyMachineSchedule from "./WeeklyMachineSchedule";
 function App() {
   return (
     <Router>
       <div className='App'>
         <Header />
-
         <div className='right-section'>
           <Sidebar />
           <div className='main-content'>
             <Routes>
               <Route path='/add-machine' element={<AddMachine />} />
+              <Route path='/add-machine/:id' element={<AddMachine />} />
               <Route path='/add-component' element={<AddComponent />} />
               <Route path='/list-comapany' element={<CompanyList />} />
+              <Route
+                path='/machine-schedule/:id'
+                element={<WeeklyMachineSchedule />}
+              />
             </Routes>
           </div>
         </div>
@@ -32,11 +36,11 @@ function Sidebar() {
       <Link to='/add-machine' className='sidebar-link'>
         ADD PROCESS
       </Link>
-      {/* <Link to='/add-component' className='sidebar-link'>
-        Add Component
-      </Link> */}
       <Link to='/list-comapany' className='sidebar-link'>
         PROCESS LIST
+      </Link>
+      <Link to='/machine-schedule' className='sidebar-link'>
+        Schedule
       </Link>
     </div>
   );

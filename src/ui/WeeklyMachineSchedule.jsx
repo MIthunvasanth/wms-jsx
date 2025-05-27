@@ -1,101 +1,247 @@
-import React, { useState } from "react";
-import { format, addDays, startOfWeek, subWeeks, addWeeks } from "date-fns";
+import React, { useEffect, useState, useMemo } from "react";
+import {
+  format,
+  addDays,
+  parseISO,
+  addMinutes,
+  isSunday,
+  isBefore,
+  startOfDay,
+} from "date-fns";
+import "./style/machines.css";
+import { useParams } from "react-router-dom";
 
-const machines = ["VP1000", "Gearg", "TRIMANS", "Huron"];
+// Generate distinct colors for machines
+function getColorFromIndex(index) {
+  const colors = [
+    "#E57373",
+    "#64B5F6",
+    "#81C784",
+    "#FFF176",
+    "#BA68C8",
+    "#4DD0E1",
+    "#FFD54F",
+    "#A1887F",
+    "#90A4AE",
+    "#F06292",
+  ];
+  return colors[index % colors.length];
+}
 
-// Sample scheduling data
-const schedule = {
-  Gearg: {
-    "2025-04-17": "Beta1",
-    "2025-04-18": "Beta1",
-  },
-  TRIMANS: {
-    "2025-04-19": "Beta2",
-    "2025-04-21": "Beta2",
-    "2025-04-22": "Beta2",
-  },
-  Huron: {
-    "2025-04-22": "Beta3",
-    "2025-04-23": "Beta3",
-  },
-};
+function getWorkingDates(startDateStr, endDateStr) {
+  const start = parseISO(startDateStr);
+  const end = parseISO(endDateStr);
+  const dates = [];
+  let current = start;
 
-// Work task → background color mapping
-const workColors = {
-  Beta1: "red",
-  Beta2: "green",
-  Beta3: "blue",
-};
+  while (current <= end) {
+    // Include all days, including Sundays
+    dates.push(new Date(current));
+    current = addDays(current, 1);
+  }
+  return dates;
+}
+
+function isWithinWorkingHours(date, startDateTime, dailyMinutes) {
+  const dayStart = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    startDateTime.getHours(),
+    startDateTime.getMinutes()
+  );
+  const dayEnd = addMinutes(dayStart, dailyMinutes);
+  return isBefore(date, dayEnd);
+}
+
+function assignTrueSequentialSchedule(
+  machines,
+  quantity,
+  startDateTime,
+  dailyMinutes
+) {
+  const schedule = {};
+  const machineStates = machines.map(() => ({
+    availableTime: parseISO(startDateTime),
+  }));
+
+  const dailyStart = parseISO(startDateTime);
+  const unitTimestamps = Array(quantity)
+    .fill(null)
+    .map(() => []);
+  machines.forEach((machine) => {
+    schedule[machine.name] = [];
+  });
+
+  for (let unitIdx = 0; unitIdx < quantity; unitIdx++) {
+    let unitStartTime = parseISO(startDateTime);
+    for (let m = 0; m < machines.length; m++) {
+      const machine = machines[m];
+      const prevFinish = unitTimestamps[unitIdx][m - 1] || unitStartTime;
+      const machineAvailable = machineStates[m].availableTime;
+      let start = prevFinish > machineAvailable ? prevFinish : machineAvailable;
+
+      while (
+        isSunday(start) ||
+        !isWithinWorkingHours(start, dailyStart, dailyMinutes)
+      ) {
+        const nextDay = addDays(startOfDay(start), 1);
+        start = new Date(
+          nextDay.getFullYear(),
+          nextDay.getMonth(),
+          nextDay.getDate(),
+          dailyStart.getHours(),
+          dailyStart.getMinutes()
+        );
+      }
+
+      const end = addMinutes(start, machine.timePerUnit);
+      unitTimestamps[unitIdx][m] = end;
+      machineStates[m].availableTime = end;
+
+      schedule[machine.name].push({
+        unit: unitIdx + 1,
+        start,
+        end,
+        date: format(start, "yyyy-MM-dd"),
+      });
+    }
+  }
+
+  return schedule;
+}
 
 const WeeklyMachineSchedule = () => {
-  const [currentWeek, setCurrentWeek] = useState(new Date());
+  const [data, setData] = useState(null);
+  const [dates, setDates] = useState([]);
+  const [machines, setMachines] = useState([]);
+  const [dailyMinutes, setDailyMinutes] = useState(0);
+  const [quantity, setQuantity] = useState(0);
+  const { id } = useParams();
 
-  const start = startOfWeek(currentWeek, { weekStartsOn: 0 }); // Sunday
-  const dates = Array.from({ length: 7 }).map((_, i) => addDays(start, i));
-  const todayStr = format(new Date(), "yyyy-MM-dd");
+  useEffect(() => {
+    getCompanyData(id);
+  }, []);
+
+  const getCompanyData = (id) => {
+    window.machineAPI.getCompanies().then((companies) => {
+      const matchedCompany = companies.find((company) => company.id === id);
+      if (matchedCompany) {
+        setData(matchedCompany);
+        if (matchedCompany?.startDateTime && matchedCompany?.endDateTime) {
+          const workingDates = getWorkingDates(
+            matchedCompany.startDateTime,
+            matchedCompany.endDateTime
+          );
+          setDates(workingDates);
+        }
+        if (Array.isArray(matchedCompany?.machines)) {
+          const machineNames = matchedCompany.machines.map((m) => m.name);
+          setMachines(machineNames);
+        }
+        if (matchedCompany?.dailyHours) {
+          setDailyMinutes(parseInt(matchedCompany.dailyHours) * 60);
+        }
+        if (matchedCompany?.quantity) {
+          setQuantity(parseInt(matchedCompany.quantity));
+        }
+      }
+    });
+  };
+
+  const schedule = useMemo(() => {
+    if (
+      data?.machines &&
+      data?.startDateTime &&
+      dailyMinutes > 0 &&
+      quantity > 0
+    ) {
+      return assignTrueSequentialSchedule(
+        data.machines,
+        quantity,
+        data.startDateTime,
+        dailyMinutes
+      );
+    }
+    return {};
+  }, [data?.machines, data?.startDateTime, dailyMinutes, quantity]);
 
   return (
-    <div className='p-4 flex justify-center'>
-      <div className='w-[90%]'>
-        <div className='flex items-center justify-between mb-4'>
-          <button
-            onClick={() => setCurrentWeek(subWeeks(currentWeek, 1))}
-            className='bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded'
-          >
-            ← Previous
-          </button>
-          <h2 className='text-xl font-bold text-center'>
-            Week of {format(start, "dd-MMM-yyyy")}
-          </h2>
-          <button
-            onClick={() => setCurrentWeek(addWeeks(currentWeek, 1))}
-            className='bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded'
-          >
-            Next →
-          </button>
-        </div>
+    <div className='schedule-container'>
+      <div className='schedule-wrapper'>
+        <h2 className='schedule-title'>
+          Machine Schedule{" "}
+          {dates.length > 0
+            ? `(${format(dates[0], "dd-MMM")} - ${format(
+                dates[dates.length - 1],
+                "dd-MMM"
+              )})`
+            : "(No working days)"}
+        </h2>
 
-        <table className='w-full text-sm border-collapse shadow-lg'>
+        <table className='schedule-table'>
           <thead>
-            <tr className='bg-gray-800 text-white'>
-              <th className='p-2 border border-gray-700 text-left'>Machine</th>
-              {dates.map((date) => (
-                <th
-                  key={date}
-                  className={`p-2 border border-gray-700 text-center ${
-                    date.getDay() === 0 ? "bg-red-500 text-white" : ""
-                  }`}
-                  style={{
-                    backgroundColor: date.getDay() === 6 ? "red" : "black",
-                  }}
-                >
-                  {format(date, "dd-MMM")}
-                </th>
-              ))}
+            <tr className='schedule-thead-tr'>
+              <th className='schedule-th schedule-th-left'>Machine</th>
+              {dates.map((date) => {
+                const isSun = isSunday(date);
+                return (
+                  <th
+                    key={date.toISOString()}
+                    className={`schedule-th text-center ${
+                      isSun ? "sunday-header" : ""
+                    }`}
+                    style={
+                      isSun
+                        ? { backgroundColor: "#ffcccc", color: "#b00000" }
+                        : {}
+                    }
+                  >
+                    {format(date, "dd-MMM")}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
-            {machines.map((machine) => (
-              <tr key={machine} className='bg-gray-900 text-white'>
-                <td className='p-2 border border-gray-700 font-semibold'>
-                  {machine}
-                </td>
-                {dates.map((date) => {
-                  const dateKey = format(date, "yyyy-MM-dd");
-                  const task = schedule[machine]?.[dateKey];
-                  const taskColor = workColors[task] || "";
-                  return (
-                    <td
-                      key={dateKey}
-                      className={`p-2 border border-gray-700 text-center rounded ${taskColor}`}
-                      style={{ backgroundColor: taskColor }}
-                    >
-                      {task || ""}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
+            {machines.map((machine, machineIdx) => {
+              const color = getColorFromIndex(machineIdx);
+              return (
+                <tr key={machine} className='schedule-tr'>
+                  <td className='schedule-machine-name'>{machine}</td>
+                  {dates.map((date) => {
+                    const dateStr = format(date, "yyyy-MM-dd");
+                    const isSun = isSunday(date);
+                    const unitsOnDate =
+                      schedule?.[machine]?.filter(
+                        (entry) => entry.date === dateStr
+                      ) || [];
+                    return (
+                      <td
+                        key={dateStr}
+                        className={`schedule-td ${isSun ? "sunday-cell" : ""}`}
+                        style={isSun ? { backgroundColor: "#ffe5e5" } : {}}
+                      >
+                        {unitsOnDate.length > 0 && (
+                          <div
+                            className='unit-count'
+                            style={{
+                              backgroundColor: color,
+                              color: "#fff",
+                              padding: "2px 6px",
+                              borderRadius: "4px",
+                              display: "inline-block",
+                            }}
+                          >
+                            {unitsOnDate.length} unit(s)
+                          </div>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

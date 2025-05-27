@@ -118,7 +118,19 @@ function handleCloseEvents(mainWindow: BrowserWindow) {
     machines.push(machine); // Add the new machine name
     saveMachines(machines); // Save the updated list back to the JSON file
   });
-
+  
+  ipcMain.handle('update-machine', (event, updatedMachine) => {
+    const machines = readMachines();
+    const index = machines.findIndex((m: any) => m.id === updatedMachine.id);
+    
+    if (index === -1) {
+      throw new Error('Machine not found');
+    }
+  
+    machines[index] = updatedMachine;
+    saveMachines(machines);
+  });
+  
   ipcMain.handle('load-machines', () => {
     const machines = readMachines();
     return machines; // Send the list back

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PlusCircle, Trash2 } from "lucide-react";
+import { useParams } from "react-router-dom";
 
 function AddMachine() {
   const [company, setCompany] = useState({
@@ -15,7 +16,45 @@ function AddMachine() {
   const [machineName, setMachineName] = useState("");
   const [timePerUnit, setTimePerUnit] = useState("");
   const [machines, setMachines] = useState([]);
+  const { id } = useParams();
+  const getCompanyData = (id) => {
+    window.machineAPI.getCompanies().then((data) => {
+      const matchedCompany = data.find((company) => company.id === id);
+      if (matchedCompany) {
+        const {
+          name,
+          address,
+          gst,
+          quantity,
+          startDateTime,
+          endDateTime,
+          dailyHours,
+          machines = [],
+        } = matchedCompany;
 
+        setCompany({
+          name,
+          address,
+          gst,
+          quantity,
+          startDateTime,
+          endDateTime,
+          dailyHours,
+        });
+
+        setMachines(machines);
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (id) {
+      getCompanyData(id);
+    } else {
+      setCompany([]);
+      setMachines([]);
+    }
+  }, []);
   const handleAddMachine = () => {
     if (machineName.trim() && timePerUnit.trim() && parseInt(timePerUnit) > 0) {
       setMachines((prev) => [
@@ -49,6 +88,7 @@ function AddMachine() {
   const handleSubmit = async () => {
     const { name, address, gst, startDateTime, endDateTime, dailyHours } =
       company;
+
     if (
       name.trim() &&
       address.trim() &&
@@ -58,11 +98,19 @@ function AddMachine() {
       dailyHours &&
       machines.length > 0
     ) {
-      const companyData = { id: generateUniqueId(), ...company, machines };
+      const companyData = {
+        id: id || generateUniqueId(),
+        ...company,
+        machines,
+      };
+
       try {
-        const response = await window.machineAPI.saveMachine(companyData);
-        console.log("Save response:", response);
-        alert("Company and machines saved successfully!");
+        const response = id
+          ? await window.machineAPI.updateMachine(companyData)
+          : await window.machineAPI.saveMachine(companyData);
+
+        console.log("Save/Update response:", response);
+        alert(`Company and machines ${id ? "updated" : "saved"} successfully!`);
       } catch (error) {
         console.error("Error during submission:", error);
         alert("Error during submission.");

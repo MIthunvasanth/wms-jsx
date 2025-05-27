@@ -1,0 +1,87 @@
+/* WeeklyMachineSchedule.css */
+
+.schedule-container {
+    padding: 1rem;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  
+  .schedule-wrapper {
+    width: 90%;
+  }
+  
+  .schedule-title {
+    font-size: 1.25rem; /* text-xl */
+    font-weight: 700; /* font-bold */
+    text-align: center;
+    margin-bottom: 1rem;
+    color: black;
+  }
+  
+  .schedule-table {
+    width: 100%;
+    font-size: 0.875rem; /* text-sm */
+    border-collapse: collapse;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    background-color: black;
+    color: white;
+  }
+  
+  .schedule-thead-tr {
+    background-color: #1f2937; /* Tailwind bg-gray-800 */
+    color: white;
+  }
+  
+  .schedule-th,
+  .schedule-td {
+    padding: 0.5rem;
+    border: 1px solid #374151; /* Tailwind border-gray-700 */
+    text-align: center;
+  }
+  
+  .schedule-th-left {
+    text-align: left;
+  }
+  
+  .schedule-tr {
+    background-color: #111827; /* Tailwind bg-gray-900 */
+    color: white;
+  }
+  
+  .schedule-machine-name {
+    font-weight: 600; /* font-semibold */
+    padding: 0.5rem;
+    border: 1px solid #374151;
+    text-align: left;
+    color: white;
+  }
+  
+  .sunday-header {
+    background-color: red !important;
+    color: white !important;
+  }
+  
+  .unit-count {
+    border-radius: 0.25rem;
+    color: white;
+    padding: 2px 4px;
+    display: inline-block;
+  }
+  
+  /* Machine color classes */
+  .machine-test {
+    background-color: red;
+  }
+  
+  .machine-test2 {
+    background-color: green;
+  }
+  
+  .machine-test3 {
+    background-color: blue;
+  }
+  .sunday-header {
+    background-color: #ffd4d4;
+    color: red;
+  }

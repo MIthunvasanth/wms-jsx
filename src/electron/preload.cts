@@ -6,6 +6,8 @@ contextBridge.exposeInMainWorld('machineAPI', {
   saveMachine: (machine:any) => ipcRenderer.invoke('save-machine',machine),
   loadMachines: () => ipcRenderer.invoke('load-machines'), 
   getCompanies: () => ipcRenderer.invoke('get-companies'),
+  updateMachine: () => ipcRenderer.invoke('update-machine'),
+
 });
 
 contextBridge.exposeInMainWorld('componentAPI', {
