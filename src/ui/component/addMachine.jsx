@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { PlusCircle, Trash2 } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { PlusCircle, Trash2, ChevronLeft } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
+import "./AddMachine.css";
 
 function AddMachine() {
   const [company, setCompany] = useState({
@@ -16,7 +17,10 @@ function AddMachine() {
   const [machineName, setMachineName] = useState("");
   const [timePerUnit, setTimePerUnit] = useState("");
   const [machines, setMachines] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { id } = useParams();
+  const navigate = useNavigate();
+
   const getCompanyData = (id) => {
     window.machineAPI.getCompanies().then((data) => {
       const matchedCompany = data.find((company) => company.id === id);
@@ -54,7 +58,8 @@ function AddMachine() {
       setCompany([]);
       setMachines([]);
     }
-  }, []);
+  }, [id]);
+
   const handleAddMachine = () => {
     if (machineName.trim() && timePerUnit.trim() && parseInt(timePerUnit) > 0) {
       setMachines((prev) => [
@@ -62,27 +67,24 @@ function AddMachine() {
         {
           name: machineName.trim(),
           timePerUnit: parseInt(timePerUnit),
+          id: Date.now().toString(), // Add unique ID for each machine
         },
       ]);
       setMachineName("");
       setTimePerUnit("");
     } else {
-      alert("Enter valid machine name and time (in minutes).");
+      alert(
+        "Please enter a valid machine name and time (must be greater than 0)."
+      );
     }
   };
 
-  const handleDeleteMachine = (indexToDelete) => {
-    setMachines((prev) => prev.filter((_, index) => index !== indexToDelete));
+  const handleDeleteMachine = (machineId) => {
+    setMachines((prev) => prev.filter((machine) => machine.id !== machineId));
   };
 
-  function generateUniqueId(length = 10) {
-    const chars =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
-    for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
+  function generateUniqueId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
   }
 
   const handleSubmit = async () => {
@@ -90,258 +92,236 @@ function AddMachine() {
       company;
 
     if (
-      name.trim() &&
-      address.trim() &&
-      gst.trim() &&
-      startDateTime &&
-      endDateTime &&
-      dailyHours &&
-      machines.length > 0
+      !name.trim() ||
+      !address.trim() ||
+      !gst.trim() ||
+      !startDateTime ||
+      !endDateTime ||
+      !dailyHours ||
+      machines.length === 0
     ) {
-      const companyData = {
-        id: id || generateUniqueId(),
-        ...company,
-        machines,
-      };
+      alert("Please fill all required fields and add at least one machine.");
+      return;
+    }
 
-      try {
-        const response = id
-          ? await window.machineAPI.updateMachine(companyData)
-          : await window.machineAPI.saveMachine(companyData);
+    setIsSubmitting(true);
 
-        console.log("Save/Update response:", response);
-        alert(`Company and machines ${id ? "updated" : "saved"} successfully!`);
-      } catch (error) {
-        console.error("Error during submission:", error);
-        alert("Error during submission.");
-      }
+    const companyData = {
+      id: id || generateUniqueId(),
+      ...company,
+      machines,
+    };
 
-      setCompany({
-        name: "",
-        address: "",
-        gst: "",
-        quantity: "",
-        startDateTime: "",
-        endDateTime: "",
-        dailyHours: "",
-      });
-      setMachines([]);
-    } else {
-      alert("Please fill all fields and add at least one machine.");
+    try {
+      const response = id
+        ? await window.machineAPI.updateMachine(companyData)
+        : await window.machineAPI.saveMachine(companyData);
+
+      console.log("Save/Update response:", response);
+      alert(`Company ${id ? "updated" : "created"} successfully!`);
+      navigate("/list-comapany");
+    } catch (error) {
+      console.error("Error during submission:", error);
+      alert("An error occurred during submission. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.heading}>Add Company Details & Machines</h2>
-
-      <div style={styles.formGrid}>
-        <input
-          type='text'
-          value={company.name}
-          placeholder='Company Name'
-          onChange={(e) => setCompany({ ...company, name: e.target.value })}
-          style={styles.input}
-        />
-        <input
-          type='text'
-          value={company.address}
-          placeholder='Company Address'
-          onChange={(e) => setCompany({ ...company, address: e.target.value })}
-          style={styles.input}
-        />
-        <input
-          type='text'
-          value={company.gst}
-          placeholder='GST Number'
-          onChange={(e) => setCompany({ ...company, gst: e.target.value })}
-          style={styles.input}
-        />
-        <input
-          type='text'
-          value={company.quantity}
-          placeholder='Quantity'
-          onChange={(e) => setCompany({ ...company, quantity: e.target.value })}
-          style={styles.input}
-        />
-        <input
-          type='datetime-local'
-          value={company.startDateTime}
-          onChange={(e) =>
-            setCompany({ ...company, startDateTime: e.target.value })
-          }
-          style={styles.input}
-        />
-        <input
-          type='datetime-local'
-          value={company.endDateTime}
-          onChange={(e) =>
-            setCompany({ ...company, endDateTime: e.target.value })
-          }
-          style={styles.input}
-        />
-        <input
-          type='number'
-          min='1'
-          max='24'
-          value={company.dailyHours}
-          placeholder='Daily Work Hours'
-          onChange={(e) =>
-            setCompany({ ...company, dailyHours: e.target.value })
-          }
-          style={styles.input}
-        />
+    <div className="add-machine-container">
+      <div className="header-section">
+        <button className="back-button" onClick={() => navigate(-1)}>
+          <ChevronLeft size={20} />
+          Back
+        </button>
+        <h1 className="page-title">
+          {id ? "Edit Company & Machines" : "Add New Company"}
+        </h1>
       </div>
 
-      <h3 style={{ marginTop: "30px" }}>Add Machines</h3>
+      <div className="form-section">
+        <h2 className="section-title">Company Information</h2>
 
-      <div style={styles.addMachineRow}>
-        <input
-          type='text'
-          value={machineName}
-          placeholder='Machine name'
-          onChange={(e) => setMachineName(e.target.value)}
-          style={{ ...styles.input, width: "40%" }}
-        />
-        <input
-          type='number'
-          min='1'
-          value={timePerUnit}
-          placeholder='Time per unit (mins)'
-          onChange={(e) => setTimePerUnit(e.target.value)}
-          style={{ ...styles.input, width: "40%" }}
-        />
-        <button onClick={handleAddMachine} style={styles.addButton}>
-          <PlusCircle size={20} />
+        <div className="form-grid">
+          <div className="form-group">
+            <label htmlFor="company-name">Company Name*</label>
+            <input
+              id="company-name"
+              type="text"
+              value={company.name}
+              placeholder="Enter company name"
+              onChange={(e) => setCompany({ ...company, name: e.target.value })}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="company-address">Company Address*</label>
+            <input
+              id="company-address"
+              type="text"
+              value={company.address}
+              placeholder="Enter company address"
+              onChange={(e) =>
+                setCompany({ ...company, address: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="gst-number">GST Number*</label>
+            <input
+              id="gst-number"
+              type="text"
+              value={company.gst}
+              placeholder="Enter GST number"
+              onChange={(e) => setCompany({ ...company, gst: e.target.value })}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="quantity">Quantity</label>
+            <input
+              id="quantity"
+              type="text"
+              value={company.quantity}
+              placeholder="Enter quantity"
+              onChange={(e) =>
+                setCompany({ ...company, quantity: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="start-date">Start Date*</label>
+            <input
+              id="start-date"
+              type="datetime-local"
+              value={company.startDateTime}
+              onChange={(e) =>
+                setCompany({ ...company, startDateTime: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="end-date">End Date*</label>
+            <input
+              id="end-date"
+              type="datetime-local"
+              value={company.endDateTime}
+              onChange={(e) =>
+                setCompany({ ...company, endDateTime: e.target.value })
+              }
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="daily-hours">Daily Work Hours*</label>
+            <input
+              id="daily-hours"
+              type="number"
+              min="1"
+              max="24"
+              value={company.dailyHours}
+              placeholder="Enter daily hours"
+              onChange={(e) =>
+                setCompany({ ...company, dailyHours: e.target.value })
+              }
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="machines-section">
+        <h2 className="section-title">Machines</h2>
+        <p className="section-description">
+          Add at least one machine to continue
+        </p>
+
+        <div className="add-machine-form">
+          <div className="input-group">
+            <input
+              type="text"
+              value={machineName}
+              placeholder="Machine name"
+              onChange={(e) => setMachineName(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && handleAddMachine()}
+            />
+            <input
+              type="number"
+              min="1"
+              value={timePerUnit}
+              placeholder="Time per unit (minutes)"
+              onChange={(e) => setTimePerUnit(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && handleAddMachine()}
+            />
+            <button
+              className="add-machine-button"
+              onClick={handleAddMachine}
+              disabled={!machineName.trim() || !timePerUnit.trim()}
+            >
+              <PlusCircle size={18} />
+              Add Machine
+            </button>
+          </div>
+        </div>
+
+        {machines.length > 0 ? (
+          <div className="machines-table-container">
+            <table className="machines-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Machine Name</th>
+                  <th>Time/Unit</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {machines.map((machine, index) => (
+                  <tr key={machine.id}>
+                    <td>{index + 1}</td>
+                    <td>{machine.name}</td>
+                    <td>{machine.timePerUnit} mins</td>
+                    <td>
+                      <button
+                        className="delete-button"
+                        onClick={() => handleDeleteMachine(machine.id)}
+                        aria-label={`Delete ${machine.name}`}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="empty-state">
+            <p>No machines added yet</p>
+          </div>
+        )}
+      </div>
+
+      <div className="actions-section">
+        <button
+          className="submit-button"
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <span className="spinner"></span>
+          ) : id ? (
+            "Update Company"
+          ) : (
+            "Create Company"
+          )}
         </button>
       </div>
-
-      {machines.length > 0 && (
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th style={styles.tableHeader}>#</th>
-              <th style={styles.tableHeader}>Machine Name</th>
-              <th style={styles.tableHeader}>Time/Unit (mins)</th>
-              <th style={styles.tableHeader}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {machines.map((machine, index) => (
-              <tr key={index} style={styles.tableRow}>
-                <td style={styles.tableCell}>{index + 1}</td>
-                <td style={styles.tableCell}>{machine.name}</td>
-                <td style={styles.tableCell}>{machine.timePerUnit}</td>
-                <td style={styles.tableCell}>
-                  <button
-                    onClick={() => handleDeleteMachine(index)}
-                    style={styles.deleteButton}
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-
-      <button onClick={handleSubmit} style={styles.submitButton}>
-        Submit Company & Machines
-      </button>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    padding: "30px",
-    maxWidth: "900px",
-    margin: "40px auto",
-    background: "#f9fafb",
-    borderRadius: "12px",
-    boxShadow: "0 6px 18px rgba(0,0,0,0.1)",
-  },
-  heading: {
-    marginBottom: "25px",
-    fontSize: "28px",
-    fontWeight: "700",
-    textAlign: "center",
-    color: "#1f2937",
-  },
-  formGrid: {
-    display: "grid",
-    gridTemplateColumns: "1fr 1fr",
-    gap: "15px",
-  },
-  input: {
-    padding: "10px 14px",
-    borderRadius: "8px",
-    border: "1px solid #d1d5db",
-    fontSize: "16px",
-    outline: "none",
-    backgroundColor: "#ffffff",
-    width: "90%",
-  },
-  addMachineRow: {
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    marginTop: "20px",
-    flexWrap: "wrap",
-  },
-  addButton: {
-    backgroundColor: "#10b981",
-    color: "white",
-    border: "none",
-    padding: "10px 14px",
-    borderRadius: "8px",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-  },
-  table: {
-    width: "100%",
-    borderCollapse: "collapse",
-    marginTop: "25px",
-  },
-  tableHeader: {
-    backgroundColor: "#e5e7eb",
-    padding: "12px",
-    textAlign: "left",
-    fontWeight: "600",
-    fontSize: "16px",
-    color: "#111827",
-  },
-  tableRow: {
-    borderBottom: "1px solid #d1d5db",
-    color: "black",
-  },
-  tableCell: {
-    padding: "12px",
-    fontSize: "15px",
-  },
-  deleteButton: {
-    backgroundColor: "#ef4444",
-    color: "white",
-    border: "none",
-    padding: "6px 10px",
-    borderRadius: "6px",
-    cursor: "pointer",
-  },
-  submitButton: {
-    marginTop: "30px",
-    background: "#3b82f6",
-    color: "white",
-    border: "none",
-    padding: "14px 20px",
-    borderRadius: "10px",
-    fontSize: "17px",
-    fontWeight: "600",
-    cursor: "pointer",
-    width: "90%",
-    textAlign: "center",
-  },
-};
 
 export default AddMachine;

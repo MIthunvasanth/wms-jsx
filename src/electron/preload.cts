@@ -1,39 +1,45 @@
-import { contextBridge, ipcRenderer } from 'electron'; // Correct import
+import { contextBridge, ipcRenderer } from "electron";
 
-// Expose 'machineAPI' to the renderer process
-console.log('Preload script loaded');
-contextBridge.exposeInMainWorld('machineAPI', {
-  saveMachine: (machine:any) => ipcRenderer.invoke('save-machine',machine),
-  loadMachines: () => ipcRenderer.invoke('load-machines'), 
-  getCompanies: () => ipcRenderer.invoke('get-companies'),
-  updateMachine: () => ipcRenderer.invoke('update-machine'),
-
+contextBridge.exposeInMainWorld("machineAPI", {
+  saveMachine: (machine: any) => ipcRenderer.invoke("save-machine", machine),
+  loadMachines: () => ipcRenderer.invoke("load-machines"),
+  getCompanies: () => ipcRenderer.invoke("get-companies"),
+  updateMachine: (machine: any) =>
+    ipcRenderer.invoke("update-machine", machine),
 });
 
-contextBridge.exposeInMainWorld('componentAPI', {
-  saveComponent: (componentData:any) => ipcRenderer.invoke('save-component', componentData),
+contextBridge.exposeInMainWorld("componentAPI", {
+  saveComponent: (componentData: any) =>
+    ipcRenderer.invoke("save-component", componentData),
 });
 
+contextBridge.exposeInMainWorld("electronAPI", {
+  auth: {
+    signup: (userData: any) => {
+      console.log("Signup called from renderer", userData);
+      return ipcRenderer.invoke("signup", userData);
+    },
+    login: (userData: any) => ipcRenderer.invoke("login", userData),
+  },
+});
 
-// Expose 'electron' API for other purposes
-contextBridge.exposeInMainWorld('electron', {
+contextBridge.exposeInMainWorld("electron", {
   subscribeStatistics: (callback) =>
-    ipcOn('statistics', (stats) => {
+    ipcOn("statistics", (stats) => {
       callback(stats);
     }),
   subscribeChangeView: (callback) =>
-    ipcOn('changeView', (view) => {
+    ipcOn("changeView", (view) => {
       callback(view);
     }),
-  getStaticData: () => ipcInvoke('getStaticData'),
-  sendFrameAction: (payload) => ipcSend('sendFrameAction', payload),
-} satisfies Window['electron']);
+  getStaticData: () => ipcInvoke("getStaticData"),
+  sendFrameAction: (payload) => ipcSend("sendFrameAction", payload),
+} satisfies Window["electron"]);
 
-// IPC utility functions
 function ipcInvoke<Key extends keyof EventPayloadMapping>(
   key: Key
 ): Promise<EventPayloadMapping[Key]> {
-  return ipcRenderer.invoke(key); // Corrected to use ipcRenderer directly
+  return ipcRenderer.invoke(key);
 }
 
 function ipcOn<Key extends keyof EventPayloadMapping>(
@@ -42,12 +48,12 @@ function ipcOn<Key extends keyof EventPayloadMapping>(
 ) {
   const cb = (_: Electron.IpcRendererEvent, payload: any) => callback(payload);
   ipcRenderer.on(key, cb);
-  return () => ipcRenderer.off(key, cb); // Corrected to use ipcRenderer directly
+  return () => ipcRenderer.off(key, cb);
 }
 
 function ipcSend<Key extends keyof EventPayloadMapping>(
   key: Key,
   payload: EventPayloadMapping[Key]
 ) {
-  ipcRenderer.send(key, payload); // Corrected to use ipcRenderer directly
+  ipcRenderer.send(key, payload);
 }
