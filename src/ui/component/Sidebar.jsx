@@ -30,7 +30,13 @@ const sidebarContent = {
     { text: "View Plan", path: "/view-plan", icon: <FiList /> },
   ],
   Master: [
-    { text: "Machine", path: "/machine-master", icon: <FiPackage /> },
+    {
+      text: "Machine",
+      path: "/list-comapany",
+      icon: <FiPackage />,
+      subRoutes: ["/machine-schedule"],
+    },
+    { text: "Add Machine", path: "/add-machine", icon: <FiPlus /> },
     { text: "Product", path: "/product-master", icon: <FiPackage /> },
     {
       text: "Holiday Setting",
@@ -49,9 +55,14 @@ function Sidebar({ user, setUser, activeTab }) {
   useEffect(() => {
     const links = sidebarContent[activeTab] || [];
     if (links.length > 0) {
-      // Check if current path is already part of the active tab's links
+      // Check if current path is already part of the active tab's links or a sub-route
       const currentPathIsValid = links.some(
-        (link) => link.path === location.pathname
+        (link) =>
+          location.pathname === link.path ||
+          (link.subRoutes &&
+            link.subRoutes.some((subRoute) =>
+              location.pathname.startsWith(subRoute)
+            ))
       );
       if (!currentPathIsValid) {
         navigate(links[0].path);
@@ -83,7 +94,13 @@ function Sidebar({ user, setUser, activeTab }) {
             key={link.path}
             to={link.path}
             className={`sidebar-link ${
-              location.pathname === link.path ? "active" : ""
+              location.pathname === link.path ||
+              (link.subRoutes &&
+                link.subRoutes.some((subRoute) =>
+                  location.pathname.startsWith(subRoute)
+                ))
+                ? "active"
+                : ""
             }`}
           >
             <div className="sidebar-link-icon">{link.icon}</div>

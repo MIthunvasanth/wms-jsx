@@ -1,5 +1,16 @@
 import { contextBridge, ipcRenderer } from "electron";
 
+contextBridge.exposeInMainWorld("productAPI", {
+  getProducts: () => ipcRenderer.invoke("get-products"),
+  getProduct: (id: string) => ipcRenderer.invoke("get-product", id),
+  createProduct: (product: any) =>
+    ipcRenderer.invoke("create-product", product),
+  updateProduct: (product: any) =>
+    ipcRenderer.invoke("update-product", product),
+  deleteProduct: (id: string) => ipcRenderer.invoke("delete-product", id),
+  generatePartNumber: () => ipcRenderer.invoke("generate-part-number"),
+});
+
 contextBridge.exposeInMainWorld("machineAPI", {
   saveMachine: (machine: any) => ipcRenderer.invoke("save-machine", machine),
   loadMachines: () => ipcRenderer.invoke("load-machines"),

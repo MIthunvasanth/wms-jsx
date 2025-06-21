@@ -1,18 +1,17 @@
 export interface Product {
-  id?: string;
-  productName: string;
+  id: string;
+  name: string;
   partNumber: string;
   processFlow: ProcessStep[];
-  priorityLevel: "Low" | "Medium" | "High";
+  priority: "Low" | "Medium" | "High";
 }
 
 export interface ProcessStep {
   id: string;
+  sequence: number;
   processName: string;
   machineId: string;
-  machineName?: string;
   cycleTime: number;
-  sequence: number;
 }
 
 export interface Machine {
@@ -20,4 +19,9 @@ export interface Machine {
   name: string;
   type: string;
   status: "Active" | "Maintenance" | "Inactive";
+}
+
+export interface User {
+  username: string;
+  email: string;
 }

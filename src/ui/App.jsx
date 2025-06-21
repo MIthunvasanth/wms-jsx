@@ -10,6 +10,7 @@ import Signup from "./component/signup";
 import Sidebar from "./component/Sidebar";
 import Header from "./component/Header";
 import WindowControls from "./component/WindowControls";
+import ProductMaster from "./component/ProductMaster";
 import AddProcess from "./component/AddProcess";
 import ProcessList from "./component/ProcessList";
 import ProcessSearch from "./component/ProcessSearch";
@@ -43,11 +44,15 @@ function App() {
                 {user ? (
                   <>
                     <Route path='/add-machine' element={<AddMachine />} />
+                    <Route path='/product-master' element={<ProductMaster />} />
                     <Route path='/add-component' element={<AddComponent />} />
                     <Route path='/list-comapany' element={<CompanyList />} />
                     <Route path='/add-process' element={<AddProcess />} />
                     <Route path='/processes' element={<ProcessList />} />
-                    <Route path='/search-processes' element={<ProcessSearch />} />
+                    <Route
+                      path='/search-processes'
+                      element={<ProcessSearch />}
+                    />
                     <Route
                       path='/machine-schedule/:id'
                       element={<WeeklyMachineSchedule />}

@@ -3,6 +3,7 @@ import { isDev, ipcMainOn } from "./util.js";
 import { getPreloadPath, getUIPath } from "./pathResolver.js";
 import fs from "fs";
 import path from "path";
+import { Product } from "./types.js";
 
 interface Machine {
   id: string;
@@ -31,6 +32,7 @@ const componentsFilePath = path.join(
   app.getPath("userData"),
   "components.json"
 );
+const productsFilePath = path.join(app.getPath("userData"), "products.json");
 
 const usersFilePath = path.join(app.getPath("userData"), "users.json");
 console.log("MACHINES FILE PATH:", machinesFilePath);
@@ -49,6 +51,23 @@ function saveMachines(machines: any) {
     fs.writeFileSync(machinesFilePath, JSON.stringify(machines, null, 2));
   } catch (error) {
     console.error("Error saving machines:", error);
+  }
+}
+
+function readProducts(): Product[] {
+  try {
+    const data = fs.readFileSync(productsFilePath, "utf-8");
+    return JSON.parse(data);
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveProducts(products: Product[]) {
+  try {
+    fs.writeFileSync(productsFilePath, JSON.stringify(products, null, 2));
+  } catch (error) {
+    console.error("Error saving products:", error);
   }
 }
 
@@ -245,4 +264,48 @@ ipcMain.handle("login", (event, credentials) => {
       role: user.role,
     },
   };
+});
+
+// Product Handlers
+ipcMain.handle("get-products", () => {
+  return readProducts();
+});
+
+ipcMain.handle("get-product", (event, id: string) => {
+  const products = readProducts();
+  return products.find((p) => p.id === id);
+});
+
+ipcMain.handle("create-product", (event, product: Product) => {
+  const products = readProducts();
+  const newProduct = { ...product, id: `prod_${Date.now()}` };
+  products.push(newProduct);
+  saveProducts(products);
+  return newProduct;
+});
+
+ipcMain.handle("update-product", (event, product: Product) => {
+  const products = readProducts();
+  const index = products.findIndex((p) => p.id === product.id);
+  if (index !== -1) {
+    products[index] = product;
+    saveProducts(products);
+    return product;
+  }
+  return null;
+});
+
+ipcMain.handle("delete-product", (event, id: string) => {
+  let products = readProducts();
+  const initialLength = products.length;
+  products = products.filter((p) => p.id !== id);
+  if (products.length < initialLength) {
+    saveProducts(products);
+    return true;
+  }
+  return false;
+});
+
+ipcMain.handle("generate-part-number", () => {
+  return `PN-${Date.now()}`;
 });
