@@ -21,8 +21,9 @@ const sidebarContent = {
     { text: "Notifications", path: "/notifications", icon: <FiBell /> },
   ],
   Order: [
-    { text: "Search Process", path: "/search-process", icon: <FiSearch /> },
-    { text: "New Process", path: "/add-machine", icon: <FiPlus /> },
+    { text: "Search Processes", path: "/search-processes", icon: <FiSearch /> },
+    { text: "View Processes", path: "/processes", icon: <FiList /> },
+    { text: "New Process", path: "/add-process", icon: <FiPlus /> },
   ],
   Plan: [
     { text: "Add Plan", path: "/add-plan", icon: <FiPlus /> },

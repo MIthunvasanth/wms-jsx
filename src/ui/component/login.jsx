@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { FiEye, FiEyeOff, FiArrowRight } from "react-icons/fi";
 import "./Auth.css";
 
@@ -220,9 +220,9 @@ function Login({ setUser }) {
 
             <p className="auth-switch-text">
               Don't have an account?
-              <a href="/signup" className="auth-switch-link">
+              <Link to="/signup" className="auth-switch-link">
                 Sign Up
-              </a>
+              </Link>
             </p>
           </form>
         </div>

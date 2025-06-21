@@ -1,0 +1,205 @@
+/* ProcessSearch.css - Modern Light UI */
+.process-search-container {
+  padding: 2rem;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  max-width: 1200px;
+  margin: 0 auto;
+  border: 1px solid #f0f2f5;
+}
+
+.process-search-container h2 {
+  font-size: 1.75rem;
+  margin-bottom: 1.75rem;
+  color: #1d1d1f;
+  font-weight: 650;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #ebebeb;
+  letter-spacing: -0.02em;
+}
+
+.search-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.search-input-wrapper {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.search-input {
+  flex-grow: 1;
+  padding: 0.875rem 1.25rem;
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #fafafa;
+  color: #1a1a1a;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.search-input::placeholder {
+  color: #9a9a9a;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  background: #ffffff;
+}
+
+.search-button {
+  padding: 0.875rem 1.75rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #3b82f6;
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.search-button:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.search-button:active {
+  transform: translateY(0);
+}
+
+.search-button:disabled {
+  background-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.search-mode-toggle {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.search-mode-toggle label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #374151;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.search-mode-toggle label:hover {
+  color: #111827;
+}
+
+.search-mode-toggle input[type="radio"] {
+  width: 1.125rem;
+  height: 1.125rem;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+.search-results-container {
+  margin-top: 2rem;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 2rem;
+}
+
+p {
+  color: #374151;
+  line-height: 1.6;
+}
+
+/* Modern Radio Button Styling */
+.radio-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.radio-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.radio-checkmark {
+  position: relative;
+  display: inline-block;
+  width: 1.125rem;
+  height: 1.125rem;
+  background-color: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 50%;
+  margin-right: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.radio-container:hover .radio-checkmark {
+  border-color: #9ca3af;
+}
+
+.radio-container input:checked ~ .radio-checkmark {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.radio-checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+  top: 50%;
+  left: 50%;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: white;
+  transform: translate(-50%, -50%);
+}
+
+.radio-container input:checked ~ .radio-checkmark:after {
+  display: block;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .process-search-container {
+    padding: 1.5rem;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+  }
+
+  .search-input-wrapper {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .search-button {
+    width: 100%;
+    padding: 1rem;
+  }
+
+  .search-mode-toggle {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+}
