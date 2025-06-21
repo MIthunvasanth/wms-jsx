@@ -1,0 +1,245 @@
+/* Enhanced Sidebar Styles */
+.sidebar {
+  width: 240px;
+  background-color: #0c1322; /* Slightly different dark shade for contrast */
+  color: #d1d5db;
+  padding: 16px 8px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0; /* Prevent sidebar from shrinking */
+  transition: width 0.3s ease-in-out;
+}
+
+.sidebar-active {
+  background-color: #fff;
+  color: #000;
+  border: 1px solid #000;
+}
+.sidebar-header {
+  padding: 24px 20px 16px;
+}
+
+.sidebar-header h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: white;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin: 16px 0;
+}
+
+.sidebar-nav {
+  flex-grow: 1;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  color: #d1d5db;
+  text-decoration: none;
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  position: relative;
+  transition: background-color 0.2s, color 0.2s;
+  font-weight: 500;
+  padding: 10px 12px;
+}
+
+.sidebar-link:hover {
+  background-color: #1f2937;
+  color: white;
+}
+
+.sidebar-link.active {
+  background-color: #3b82f6;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2),
+    0 2px 4px -1px rgba(59, 130, 246, 0.1);
+}
+
+.sidebar-link-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  font-size: 1.2rem;
+}
+
+.sidebar-link-text {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.sidebar-link.active .sidebar-link-text {
+  font-weight: 600;
+}
+
+.active-indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: var(--primary-light);
+  border-radius: 3px 0 0 3px;
+}
+
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid #1f2937;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #dbeafe;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.user-info {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.user-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+}
+
+.user-role {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+/* Logout button */
+.logout-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px;
+  background-color: #1f2937;
+  color: #d1d5db;
+  border: 1px solid #374151;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.logout-button:hover {
+  background-color: #b91c1c;
+  color: white;
+  border-color: #ef4444;
+}
+
+.logout-icon {
+  font-size: 1.1rem;
+}
+
+/* Logout Confirmation Modal Styles */
+.logout-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.logout-modal {
+  background-color: #1f2937;
+  color: #f9fafb;
+  padding: 2rem;
+  border-radius: 8px;
+  border: 1px solid #374151;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  width: 350px;
+  max-width: 90%;
+  text-align: center;
+}
+
+.logout-modal h3 {
+  margin-top: 0;
+  color: white;
+  font-size: 1.25rem;
+}
+
+.logout-modal p {
+  color: #d1d5db;
+  margin-bottom: 1.5rem;
+}
+
+.logout-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.logout-modal-cancel,
+.logout-modal-confirm {
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.logout-modal-cancel {
+  background-color: #374151;
+  color: #d1d5db;
+}
+
+.logout-modal-cancel:hover {
+  background-color: #4b5563;
+}
+
+.logout-modal-confirm {
+  background-color: #dc2626;
+  color: white;
+}
+
+.logout-modal-confirm:hover {
+  background-color: #b91c1c;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

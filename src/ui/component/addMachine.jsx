@@ -131,10 +131,6 @@ function AddMachine() {
   return (
     <div className="add-machine-container">
       <div className="header-section">
-        <button className="back-button" onClick={() => navigate(-1)}>
-          <ChevronLeft size={20} />
-          Back
-        </button>
         <h1 className="page-title">
           {id ? "Edit Company & Machines" : "Add New Company"}
         </h1>

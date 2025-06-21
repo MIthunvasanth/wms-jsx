@@ -1,0 +1,29 @@
+.window-controls {
+  display: flex;
+  justify-content: flex-end;
+  background-color: #111827;
+  -webkit-app-region: drag; /* Allows dragging the window */
+  padding: 4px;
+}
+
+.window-control-button {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-size: 1.2rem;
+  line-height: 1;
+  -webkit-app-region: no-drag; /* Exclude buttons from drag region */
+}
+
+.window-control-button:hover {
+  color: white;
+  background-color: #1f2937;
+}
+
+.window-control-button.close:hover {
+  background-color: #e81123;
+  color: white;
+}
