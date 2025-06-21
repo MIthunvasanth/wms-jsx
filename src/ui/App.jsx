@@ -14,6 +14,7 @@ import ProductMaster from "./component/ProductMaster";
 import AddProcess from "./component/AddProcess";
 import ProcessList from "./component/ProcessList";
 import ProcessSearch from "./component/ProcessSearch";
+import InvoiceFilter from "./component/InvoiceFilter";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -57,6 +58,7 @@ function App() {
                       path='/machine-schedule/:id'
                       element={<WeeklyMachineSchedule />}
                     />
+                    <Route path="/add-plan" element={<InvoiceFilter />} />
                   </>
                 ) : (
                   <Route path='/' element={<Login setUser={setUser} />} />
