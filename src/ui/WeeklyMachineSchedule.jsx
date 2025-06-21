@@ -43,7 +43,11 @@ function getWorkingDates(startDateStr, endDateStr) {
   return dates;
 }
 
-function isWithinWorkingHours(date, startDateTime, dailyMinutes) {
+function isWithinWorkingHours(date, startDateTime, dailyMinutes, holidays) {
+  const dateString = format(date, "yyyy-MM-dd");
+  if (holidays.some((h) => h.date === dateString)) {
+    return false; // It's a holiday
+  }
   const dayStart = new Date(
     date.getFullYear(),
     date.getMonth(),
@@ -59,7 +63,8 @@ function assignTrueSequentialSchedule(
   machines,
   quantity,
   startDateTime,
-  dailyMinutes
+  dailyMinutes,
+  holidays
 ) {
   const schedule = {};
   const machineStates = machines.map(() => ({
@@ -84,7 +89,7 @@ function assignTrueSequentialSchedule(
 
       while (
         isSunday(start) ||
-        !isWithinWorkingHours(start, dailyStart, dailyMinutes)
+        !isWithinWorkingHours(start, dailyStart, dailyMinutes, holidays)
       ) {
         const nextDay = addDays(startOfDay(start), 1);
         start = new Date(
@@ -118,12 +123,19 @@ const WeeklyMachineSchedule = () => {
   const [machines, setMachines] = useState([]);
   const [dailyMinutes, setDailyMinutes] = useState(0);
   const [quantity, setQuantity] = useState(0);
+  const [holidays, setHolidays] = useState([]);
   const { id } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
     getCompanyData(id);
+    loadHolidays();
   }, []);
+
+  const loadHolidays = async () => {
+    const holidayData = await window.holidayAPI.loadHolidays();
+    setHolidays(holidayData);
+  };
 
   const getCompanyData = (id) => {
     window.machineAPI.getCompanies().then((companies) => {
@@ -162,11 +174,12 @@ const WeeklyMachineSchedule = () => {
         data.machines,
         quantity,
         data.startDateTime,
-        dailyMinutes
+        dailyMinutes,
+        holidays
       );
     }
     return {};
-  }, [data?.machines, data?.startDateTime, dailyMinutes, quantity]);
+  }, [data?.machines, data?.startDateTime, dailyMinutes, quantity, holidays]);
 
   return (
     <div className="schedule-container">
@@ -193,14 +206,17 @@ const WeeklyMachineSchedule = () => {
               <th className="schedule-th schedule-th-left">Machine</th>
               {dates.map((date) => {
                 const isSun = isSunday(date);
+                const isHoliday = holidays.some(
+                  (h) => h.date === format(date, "yyyy-MM-dd")
+                );
                 return (
                   <th
                     key={date.toISOString()}
                     className={`schedule-th text-center ${
-                      isSun ? "sunday-header" : ""
+                      isSun || isHoliday ? "sunday-header" : ""
                     }`}
                     style={
-                      isSun
+                      isSun || isHoliday
                         ? { backgroundColor: "#ffcccc", color: "#b00000" }
                         : {}
                     }
@@ -220,6 +236,7 @@ const WeeklyMachineSchedule = () => {
                   {dates.map((date) => {
                     const dateStr = format(date, "yyyy-MM-dd");
                     const isSun = isSunday(date);
+                    const isHoliday = holidays.some((h) => h.date === dateStr);
                     const unitsOnDate =
                       schedule?.[machine]?.filter(
                         (entry) => entry.date === dateStr
@@ -227,8 +244,14 @@ const WeeklyMachineSchedule = () => {
                     return (
                       <td
                         key={dateStr}
-                        className={`schedule-td ${isSun ? "sunday-cell" : ""}`}
-                        style={isSun ? { backgroundColor: "#ffe5e5" } : {}}
+                        className={`schedule-td ${
+                          isSun || isHoliday ? "sunday-cell" : ""
+                        }`}
+                        style={
+                          isSun || isHoliday
+                            ? { backgroundColor: "#ffe5e5" }
+                            : {}
+                        }
                       >
                         {unitsOnDate.length > 0 && (
                           <div

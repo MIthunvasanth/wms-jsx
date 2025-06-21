@@ -1,0 +1,65 @@
+:root {
+  --holiday-primary: #1890ff;
+  --holiday-error: #ff4d4f;
+  --holiday-background: #f5f7fa;
+  --holiday-sunday-bg: #fff1f0;
+  --holiday-sunday-text: #cf1322;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+}
+
+.holiday-calendar-card .ant-card-body {
+  padding: 0;
+}
+
+.holiday-list {
+  padding: 24px;
+  height: 100%;
+  background-color: var(--holiday-background);
+}
+
+.holiday-list .ant-list-item {
+  border-bottom: 1px solid #e8e8e8;
+  padding: 16px 8px;
+}
+
+.holiday-list .ant-list-item-meta-title {
+  color: #333;
+  font-weight: 500;
+}
+
+.holiday-list .ant-list-item-meta-description {
+  font-size: 12px;
+}
+
+.holiday-calendar-container {
+  border-right: 1px solid #f0f0f0;
+}
+
+.holiday-calendar-container .ant-picker-cell-disabled::before {
+  background: none !important; /* Remove grey background for disabled sundays */
+}
+
+.holiday-calendar-container
+  .ant-picker-cell-in-view.sunday-cell
+  .ant-picker-cell-inner {
+  background-color: var(--holiday-sunday-bg);
+  color: var(--holiday-sunday-text);
+  border-radius: 4px;
+}
+.holiday-calendar-container
+  .ant-picker-cell-in-view.sunday-cell
+  .ant-picker-cell-inner:hover {
+  background-color: #ffe0de;
+}
+
+.holiday-badge-wrapper {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 1;
+}
+
+.holiday-badge .ant-badge-status-dot {
+  width: 8px;
+  height: 8px;
+}

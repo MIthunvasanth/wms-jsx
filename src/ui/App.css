@@ -30,8 +30,8 @@ body {
 
 .main-content {
   flex-grow: 1;
-  overflow-y: auto; /* Allow only the main content to scroll */
-  padding: 24px;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 /* Custom scrollbar for a more integrated feel */

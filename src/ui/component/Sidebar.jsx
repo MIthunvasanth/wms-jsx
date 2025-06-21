@@ -39,11 +39,11 @@ const sidebarContent = {
     { text: "Add Machine", path: "/add-machine", icon: <FiPlus /> },
     { text: "Product", path: "/product-master", icon: <FiPackage /> },
     {
-      text: "Holiday Setting",
-      path: "/holiday-settings",
+      text: "Holiday Calendar",
+      path: "/holiday-calendar",
       icon: <FiCalendar />,
     },
-    { text: "Work/Shift Time", path: "/shift-settings", icon: <FiClock /> },
+    { text: "Shift Settings", path: "/shift-settings", icon: <FiClock /> },
   ],
 };
 
