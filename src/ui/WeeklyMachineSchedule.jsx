@@ -9,7 +9,8 @@ import {
   startOfDay,
 } from "date-fns";
 import "./style/machines.css";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { ChevronLeft } from "lucide-react";
 
 // Generate distinct colors for machines
 function getColorFromIndex(index) {
@@ -118,6 +119,7 @@ const WeeklyMachineSchedule = () => {
   const [dailyMinutes, setDailyMinutes] = useState(0);
   const [quantity, setQuantity] = useState(0);
   const { id } = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     getCompanyData(id);
@@ -167,9 +169,13 @@ const WeeklyMachineSchedule = () => {
   }, [data?.machines, data?.startDateTime, dailyMinutes, quantity]);
 
   return (
-    <div className='schedule-container'>
-      <div className='schedule-wrapper'>
-        <h2 className='schedule-title'>
+    <div className="schedule-container">
+      <div className="schedule-header">
+        <button className="back-button" onClick={() => navigate(-1)}>
+          <ChevronLeft size={20} />
+          <span>Back</span>
+        </button>
+        <h2 className="schedule-title">
           Machine Schedule{" "}
           {dates.length > 0
             ? `(${format(dates[0], "dd-MMM")} - ${format(
@@ -178,11 +184,13 @@ const WeeklyMachineSchedule = () => {
               )})`
             : "(No working days)"}
         </h2>
+      </div>
 
-        <table className='schedule-table'>
+      <div className="schedule-wrapper">
+        <table className="schedule-table">
           <thead>
-            <tr className='schedule-thead-tr'>
-              <th className='schedule-th schedule-th-left'>Machine</th>
+            <tr className="schedule-thead-tr">
+              <th className="schedule-th schedule-th-left">Machine</th>
               {dates.map((date) => {
                 const isSun = isSunday(date);
                 return (
@@ -207,8 +215,8 @@ const WeeklyMachineSchedule = () => {
             {machines.map((machine, machineIdx) => {
               const color = getColorFromIndex(machineIdx);
               return (
-                <tr key={machine} className='schedule-tr'>
-                  <td className='schedule-machine-name'>{machine}</td>
+                <tr key={machine} className="schedule-tr">
+                  <td className="schedule-machine-name">{machine}</td>
                   {dates.map((date) => {
                     const dateStr = format(date, "yyyy-MM-dd");
                     const isSun = isSunday(date);
@@ -224,7 +232,7 @@ const WeeklyMachineSchedule = () => {
                       >
                         {unitsOnDate.length > 0 && (
                           <div
-                            className='unit-count'
+                            className="unit-count"
                             style={{
                               backgroundColor: color,
                               color: "#fff",

@@ -40,27 +40,21 @@ const ProductMaster = () => {
   // Load initial data
   useEffect(() => {
     loadData();
+  }, []);
 
-    // Set up subscriptions
-    const unsubscribeProducts =
-      window.electron.subscribeProductUpdates(setProducts);
-    const unsubscribeMachines = window.electron.subscribeStatistics((stats) => {
-      if (stats.machines) setMachines(stats.machines);
+  useEffect(() => {
+    console.log("Available window APIs:", {
+      productAPI: window.productAPI,
+      machineAPI: window.machineAPI,
+      electron: window.electron,
     });
-
-    return () => {
-      unsubscribeProducts();
-      unsubscribeMachines();
-    };
   }, []);
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [productsData, machinesData] = await Promise.all([
-        window.productAPI.loadProducts(),
-        window.productAPI.loadMachines(),
-      ]);
+      const productsData = await window.productAPI.getProducts();
+      const machinesData = await window.machineAPI.loadMachines();
       setProducts(productsData);
       setMachines(machinesData);
     } catch (error) {
@@ -77,16 +71,17 @@ const ProductMaster = () => {
   const handleSubmit = async (values) => {
     try {
       if (editingProduct) {
-        await window.productAPI.saveProduct({ ...editingProduct, ...values });
+        await window.productAPI.updateProduct({ ...editingProduct, ...values });
         notification.success({ message: "Product updated successfully" });
       } else {
         const partNumber =
           values.partNumber || (await window.productAPI.generatePartNumber());
-        await window.productAPI.saveProduct({ ...values, partNumber });
+        await window.productAPI.createProduct({ ...values, partNumber });
         notification.success({ message: "Product created successfully" });
       }
       form.resetFields();
       setEditingProduct(null);
+      loadData();
     } catch (error) {
       notification.error({
         message: "Operation failed",
@@ -104,6 +99,7 @@ const ProductMaster = () => {
     try {
       await window.productAPI.deleteProduct(id);
       notification.success({ message: "Product deleted successfully" });
+      loadData();
     } catch (error) {
       notification.error({
         message: "Deletion failed",
@@ -144,6 +140,7 @@ const ProductMaster = () => {
 
       setProcessModalVisible(false);
       notification.success({ message: "Process step saved successfully" });
+      loadData();
     } catch (error) {
       notification.error({
         message: "Failed to save process step",
@@ -158,6 +155,7 @@ const ProductMaster = () => {
     try {
       await window.productAPI.deleteProcessStep(editingProduct.id, stepId);
       notification.success({ message: "Process step deleted successfully" });
+      loadData();
     } catch (error) {
       notification.error({
         message: "Failed to delete process step",
@@ -195,6 +193,7 @@ const ProductMaster = () => {
         editingProduct.id,
         updatedSteps[newIndex]
       );
+      loadData();
     } catch (error) {
       notification.error({
         message: "Failed to move process step",

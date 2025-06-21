@@ -10,6 +10,7 @@ import Signup from "./component/signup";
 import Sidebar from "./component/Sidebar";
 import Header from "./component/Header";
 import WindowControls from "./component/WindowControls";
+import ProductMaster from "./component/ProductMaster";
 
 function App() {
   const [user, setUser] = useState({ name: "Dev User" }); // Temp for dev
@@ -42,6 +43,7 @@ function App() {
                     <Route path="/add-machine" element={<AddMachine />} />
                     <Route path="/add-component" element={<AddComponent />} />
                     <Route path="/list-comapany" element={<CompanyList />} />
+                    <Route path="/product-master" element={<ProductMaster />} />
                     <Route
                       path="/machine-schedule/:id"
                       element={<WeeklyMachineSchedule />}

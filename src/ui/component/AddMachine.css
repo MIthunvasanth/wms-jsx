@@ -29,6 +29,8 @@
   background-color: var(--white);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
+  height: 90vh;
+  overflow-y: auto;
 }
 
 .header-section {
@@ -354,10 +356,31 @@
   color: var(--error-color);
 }
 
+/* Custom Scrollbar */
+.add-machine-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.add-machine-container::-webkit-scrollbar-track {
+  background-color: var(--background-lighter);
+  border-radius: var(--radius-md);
+}
+
+.add-machine-container::-webkit-scrollbar-thumb {
+  background-color: var(--primary-color);
+  border-radius: var(--radius-md);
+  transition: background-color 0.2s ease;
+}
+
+.add-machine-container::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary-dark);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .add-machine-container {
     padding: 1.5rem;
+    border-radius: 0;
   }
 
   .form-grid {
