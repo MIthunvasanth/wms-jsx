@@ -18,6 +18,7 @@ import ShiftSettings from "./component/ShiftSettings";
 import HolidayCalendar from "./component/HolidayCalendar";
 import Dashboard from "./component/Dashboard";
 import Placeholder from "./component/Placeholder";
+import InvoiceFilter from "./component/InvoiceFilter";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -84,6 +85,7 @@ function App() {
                       path="/machine-schedule/:id"
                       element={<WeeklyMachineSchedule />}
                     />
+                    <Route path="/add-plan" element={<InvoiceFilter />} />
                   </>
                 ) : (
                   <Route path="*" element={<Login setUser={handleLogin} />} />

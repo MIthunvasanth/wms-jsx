@@ -103,23 +103,24 @@ function Signup() {
       <div className="auth-left-panel">
         <div className="auth-logo">Process Scheduler</div>
         <div className="auth-left-content">
-          <h1>Optimize Your Workflow</h1>
+          <h1>Activate Your Digital Factory</h1>
           <p>
-            Create an account to manage and schedule your processes efficiently.
-            Our system helps you visualize and optimize your workflow.
+            This is the central control system for your production line. Create
+            accounts for your team members to manage schedules, track machine
+            performance, and streamline operations.
           </p>
           <div className="auth-features">
             <div className="auth-feature-item">
               <div className="auth-feature-icon">✓</div>
-              <span>Real-time process monitoring</span>
+              <span>Centralized Process & Machine Management</span>
             </div>
             <div className="auth-feature-item">
               <div className="auth-feature-icon">✓</div>
-              <span>Multiple scheduling algorithms</span>
+              <span>Dynamic Production Scheduling & Analytics</span>
             </div>
             <div className="auth-feature-item">
               <div className="auth-feature-icon">✓</div>
-              <span>Role-based access control</span>
+              <span>Secure, Role-Based Access for Your Entire Team</span>
             </div>
           </div>
         </div>
@@ -130,8 +131,10 @@ function Signup() {
 
       <div className="auth-right-panel">
         <div className="auth-form-container">
-          <h2>Create your account</h2>
-          <p className="auth-subtitle">Get started with Process Scheduler</p>
+          <h2>Create a User Account</h2>
+          <p className="auth-subtitle">
+            Fill in the details to grant access to the system.
+          </p>
 
           {success && (
             <div className="auth-success-message">
@@ -221,8 +224,8 @@ function Signup() {
                 >
                   <FiUser className="role-icon" />
                   <div>
-                    <h4>Standard User</h4>
-                    <p>Create and manage processes</p>
+                    <h4>Operator</h4>
+                    <p>View schedules and update process status</p>
                   </div>
                 </div>
                 <div
@@ -234,7 +237,7 @@ function Signup() {
                   <FiBriefcase className="role-icon" />
                   <div>
                     <h4>Administrator</h4>
-                    <p>Full system access</p>
+                    <p>Manage users, machines, and schedules</p>
                   </div>
                 </div>
               </div>

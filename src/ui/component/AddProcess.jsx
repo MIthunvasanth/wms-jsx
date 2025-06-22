@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AddProcess.css";
+import { notification } from "antd";
 
 const defaultCards = [
   {
@@ -46,6 +47,8 @@ const AddProcess = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [selectedCard, setSelectedCard] = useState(null);
+  const [products, setProducts] = useState([]);
+  // const [machines, setMachines] = useState([]);
   const navigate = useNavigate();
 
   const handleCardClick = (card) => {
@@ -53,9 +56,9 @@ const AddProcess = () => {
       productName: card.productName,
       productNo: card.productNo,
       partNo: card.partNo,
-      drawingNo: card.drawingNo,
-      completeQty: card.completeQty.toString(),
-      penaltyQty: card.penaltyQty.toString(),
+      // drawingNo: card.drawingNo,
+      // completeQty: card.completeQty.toString(),
+      // penaltyQty: card.penaltyQty.toString(),
       description: "",
     });
     setSelectedCard(card.id);
@@ -92,15 +95,41 @@ const AddProcess = () => {
     }
   };
 
+  const loadData = async () => {
+    // setLoading(true);
+    try {
+      const productsData = await window.productAPI.getProducts();
+      const machinesData = await window.machineAPI.loadMachines();
+
+      console.log(productsData, "prody");
+
+      setProducts(productsData);
+      // setMachines(machinesData);
+    } catch (error) {
+      console.error("Failed to load data:", error);
+      // notification.error({
+      //   message: "Failed to load data",
+      //   description: error.message,
+      // });
+    }
+    // finally {
+    //   setLoading(false);
+    // }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
   return (
     <div className='add-process-container'>
       <h2>{showForm ? "Create New Process" : "Select a Product Template"}</h2>
 
       {!showForm ? (
         <div className='card-grid'>
-          {defaultCards.map((card) => (
+          {products?.map((card, key) => (
             <div
-              key={card.id}
+              key={key}
               className={`process-card ${
                 selectedCard === card.id ? "selected" : ""
               }`}
@@ -108,13 +137,16 @@ const AddProcess = () => {
             >
               <h3>{card.productName}</h3>
               <p>
-                <strong>Product No:</strong> {card.productNo}
+                <strong>Product No:</strong> {card.id}
               </p>
               <p>
-                <strong>Part No:</strong> {card.partNo}
+                <strong>Part No:</strong> {card.partNumber}
               </p>
-              <p>
+              {/* <p>
                 <strong>Drawing No:</strong> {card.drawingNo}
+              </p> */}
+              <p>
+                <strong>Priority Level No:</strong> {card.priorityLevel}
               </p>
             </div>
           ))}
@@ -159,7 +191,7 @@ const AddProcess = () => {
                   id='productNo'
                   name='productNo'
                   type='text'
-                  value={formData.productNo}
+                  value={formData.id}
                   onChange={handleChange}
                   placeholder='e.g., HC-2023-001'
                   disabled={isSubmitting}
@@ -171,14 +203,14 @@ const AddProcess = () => {
                   id='partNo'
                   name='partNo'
                   type='text'
-                  value={formData.partNo}
+                  value={formData.partNumber}
                   onChange={handleChange}
                   placeholder='e.g., PT-9876'
                   disabled={isSubmitting}
                 />
               </div>
             </div>
-            <div className='form-col'>
+            {/* <div className='form-col'>
               <div className='form-group'>
                 <label htmlFor='drawingNo'>Drawing Number *</label>
                 <input
@@ -215,7 +247,7 @@ const AddProcess = () => {
                   disabled={isSubmitting}
                 />
               </div>
-            </div>
+            </div> */}
           </div>
           <div className='form-group'>
             <label htmlFor='description'>Description</label>

@@ -76,31 +76,16 @@ function Login({ setUser }) {
   return (
     <div className="auth-container">
       <div className="auth-left-panel">
-        <div className="auth-logo">YourApp</div>
+        <div className="auth-logo">Process Scheduler</div>
         <div className="auth-left-content">
-          <h1>Welcome Back</h1>
+          <h1>Access Your Control Panel</h1>
           <p>
-            Log in to your account to continue your journey with us. We've
-            missed you!
+            Log in to manage machine schedules, monitor production,
+            and streamline your entire operational workflow.
           </p>
-
-          {/* <div className="auth-features">
-            <div className="auth-feature-item">
-              <FiCheck className="auth-feature-icon" />
-              <span>Access your personalized dashboard</span>
-            </div>
-            <div className="auth-feature-item">
-              <FiCheck className="auth-feature-icon" />
-              <span>Continue where you left off</span>
-            </div>
-            <div className="auth-feature-item">
-              <FiCheck className="auth-feature-icon" />
-              <span>Get personalized recommendations</span>
-            </div> */}
-          {/* </div> */}
         </div>
         <div className="auth-footer-text">
-          © 2023 YourApp. All rights reserved.
+          © {new Date().getFullYear()} Process Scheduler. All rights reserved.
         </div>
       </div>
 
