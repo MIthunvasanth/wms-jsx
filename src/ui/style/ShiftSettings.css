@@ -1,0 +1,46 @@
+.shift-settings-page {
+  padding: 24px;
+}
+
+.shift-form-card .ant-card-head-title {
+  font-weight: 500;
+}
+
+.shift-form-card .ant-divider-inner-text {
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.break-list-item {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  background-color: #fafafa;
+  padding: 16px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.break-list-item .ant-form-item {
+  margin-bottom: 0;
+}
+
+.remove-break-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  font-size: 16px;
+}
+.remove-break-button:hover {
+  color: #ff4d4f;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+}

@@ -11,6 +11,27 @@ contextBridge.exposeInMainWorld("productAPI", {
   generatePartNumber: () => ipcRenderer.invoke("generate-part-number"),
 });
 
+contextBridge.exposeInMainWorld("dashboardAPI", {
+  getProductionMetrics: () => ipcRenderer.invoke("get-production-metrics"),
+  getMachineStatus: () => ipcRenderer.invoke("get-machine-status"),
+  getDefectTrends: () => ipcRenderer.invoke("get-defect-trends"),
+  getOrderStatus: () => ipcRenderer.invoke("get-order-status"),
+  getShiftPerformance: () => ipcRenderer.invoke("get-shift-performance"),
+  getQualityAlerts: () => ipcRenderer.invoke("get-quality-alerts"),
+});
+
+contextBridge.exposeInMainWorld("holidayAPI", {
+  getHolidays: () => ipcRenderer.invoke("get-holidays"),
+  saveHoliday: (holiday: any) => ipcRenderer.invoke("save-holiday", holiday),
+  deleteHoliday: (id: string) => ipcRenderer.invoke("delete-holiday", id),
+});
+
+contextBridge.exposeInMainWorld("shiftAPI", {
+  getShifts: () => ipcRenderer.invoke("get-shifts"),
+  saveShift: (shift: any) => ipcRenderer.invoke("save-shift", shift),
+  deleteShift: (id: string) => ipcRenderer.invoke("delete-shift", id),
+});
+
 contextBridge.exposeInMainWorld("machineAPI", {
   saveMachine: (machine: any) => ipcRenderer.invoke("save-machine", machine),
   loadMachines: () => ipcRenderer.invoke("load-machines"),

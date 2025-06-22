@@ -25,3 +25,23 @@ export interface User {
   username: string;
   email: string;
 }
+
+export interface Break {
+  id: string;
+  name: string;
+  duration: number; // in minutes
+}
+
+export interface Shift {
+  id: string;
+  name: string;
+  startTime: string; // "HH:mm"
+  endTime: string; // "HH:mm"
+  breaks: Break[];
+}
+
+export interface Holiday {
+  id: string;
+  date: string; // YYYY-MM-DD
+  description: string;
+}
