@@ -59,10 +59,6 @@ function App() {
                       element={<Placeholder title="Notifications" />}
                     />
                     <Route
-                      path="/add-plan"
-                      element={<Placeholder title="Add Plan" />}
-                    />
-                    <Route
                       path="/view-plan"
                       element={<Placeholder title="View Plan" />}
                     />
