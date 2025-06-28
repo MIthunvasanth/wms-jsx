@@ -4,6 +4,10 @@ import { useState } from "react";
 import AddMachine from "./component/addMachine";
 import AddComponent from "./component/addComponent";
 import CompanyList from "./component/Comapnylist";
+import Company from "./component/Company";
+import AddCompany from "./component/AddCompany";
+import AddOrder from "./component/AddOrder";
+import CompanyOrders from "./component/CompanyOrders";
 import WeeklyMachineSchedule from "./WeeklyMachineSchedule";
 import Login from "./component/login";
 import Signup from "./component/signup";
@@ -23,10 +27,15 @@ import InvoiceFilter from "./component/InvoiceFilter";
 function App() {
   const [user, setUser] = useState(null);
   const [activeTab, setActiveTab] = useState("Home");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const handleLogin = (userData) => {
     setUser(userData);
     setActiveTab("Home");
+  };
+
+  const handleSidebarToggle = (collapsed) => {
+    setIsSidebarCollapsed(collapsed);
   };
 
   return (
@@ -35,9 +44,19 @@ function App() {
         <WindowControls />
         <div className="app-main">
           {user && <Header activeTab={activeTab} setActiveTab={setActiveTab} />}
-          <div className="app-content">
+          <div
+            className={`app-content ${
+              isSidebarCollapsed ? "sidebar-collapsed" : ""
+            }`}
+          >
             {user && (
-              <Sidebar user={user} setUser={setUser} activeTab={activeTab} />
+              <Sidebar
+                user={user}
+                setUser={setUser}
+                activeTab={activeTab}
+                isCollapsed={isSidebarCollapsed}
+                onToggle={handleSidebarToggle}
+              />
             )}
             <main className="main-content">
               <Routes>
@@ -71,6 +90,9 @@ function App() {
                     />
                     <Route path="/add-component" element={<AddComponent />} />
                     <Route path="/list-comapany" element={<CompanyList />} />
+                    <Route path="/company" element={<Company />} />
+                    <Route path="/add-company" element={<AddCompany />} />
+                    <Route path="/edit-company/:id" element={<AddCompany />} />
                     <Route path="/add-process" element={<AddProcess />} />
                     <Route path="/processes" element={<ProcessList />} />
                     <Route
@@ -81,7 +103,19 @@ function App() {
                       path="/machine-schedule/:id"
                       element={<WeeklyMachineSchedule />}
                     />
+                    <Route
+                      path="/machine-schedule/order/:id"
+                      element={<WeeklyMachineSchedule />}
+                    />
                     <Route path="/add-plan" element={<InvoiceFilter />} />
+                    <Route
+                      path="/add-order/:companyId"
+                      element={<AddOrder />}
+                    />
+                    <Route
+                      path="/company-orders/:companyId"
+                      element={<CompanyOrders />}
+                    />
                   </>
                 ) : (
                   <Route path="*" element={<Login setUser={handleLogin} />} />

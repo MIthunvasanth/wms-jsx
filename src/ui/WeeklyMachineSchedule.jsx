@@ -7,24 +7,36 @@ import {
   isSunday,
   isBefore,
   startOfDay,
+  differenceInDays,
+  startOfWeek,
+  endOfWeek,
 } from "date-fns";
 import "./style/machines.css";
 import { useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft } from "lucide-react";
+import {
+  ChevronLeft,
+  Calendar,
+  Clock,
+  Package,
+  Settings,
+  TrendingUp,
+  Info,
+  AlertCircle,
+} from "lucide-react";
 
 // Generate distinct colors for machines
 function getColorFromIndex(index) {
   const colors = [
-    "#E57373",
-    "#64B5F6",
-    "#81C784",
-    "#FFF176",
-    "#BA68C8",
-    "#4DD0E1",
-    "#FFD54F",
-    "#A1887F",
-    "#90A4AE",
-    "#F06292",
+    "#3B82F6", // Blue
+    "#10B981", // Green
+    "#F59E0B", // Yellow
+    "#EF4444", // Red
+    "#8B5CF6", // Purple
+    "#06B6D4", // Cyan
+    "#F97316", // Orange
+    "#EC4899", // Pink
+    "#84CC16", // Lime
+    "#6366F1", // Indigo
   ];
   return colors[index % colors.length];
 }
@@ -36,7 +48,6 @@ function getWorkingDates(startDateStr, endDateStr) {
   let current = start;
 
   while (current <= end) {
-    // Include all days, including Sundays
     dates.push(new Date(current));
     current = addDays(current, 1);
   }
@@ -46,7 +57,7 @@ function getWorkingDates(startDateStr, endDateStr) {
 function isWithinWorkingHours(date, startDateTime, dailyMinutes, holidays) {
   const dateString = format(date, "yyyy-MM-dd");
   if (holidays.some((h) => h.date === dateString)) {
-    return false; // It's a holiday
+    return false;
   }
   const dayStart = new Date(
     date.getFullYear(),
@@ -59,222 +70,342 @@ function isWithinWorkingHours(date, startDateTime, dailyMinutes, holidays) {
   return isBefore(date, dayEnd);
 }
 
-function assignTrueSequentialSchedule(
-  machines,
-  quantity,
-  startDateTime,
-  dailyMinutes,
-  holidays
-) {
-  const schedule = {};
-  const machineStates = machines.map(() => ({
-    availableTime: parseISO(startDateTime),
-  }));
+function generateSchedule(order, company, holidays) {
+  if (!order || !company) return {};
 
-  const dailyStart = parseISO(startDateTime);
-  const unitTimestamps = Array(quantity)
-    .fill(null)
-    .map(() => []);
-  machines.forEach((machine) => {
-    schedule[machine.name] = [];
+  const schedule = {};
+  const startDate = parseISO(order.startDate);
+  const endDate = parseISO(order.endDate);
+  const dailyHours = company.dailyHours || 8;
+  const dailyMinutes = dailyHours * 60;
+  const units = order.units || 1;
+
+  // Get working dates
+  const workingDates = getWorkingDates(order.startDate, order.endDate);
+
+  // Calculate total working days
+  const totalWorkingDays = workingDates.filter((date) => {
+    const dateStr = format(date, "yyyy-MM-dd");
+    return !isSunday(date) && !holidays.some((h) => h.date === dateStr);
+  }).length;
+
+  // Calculate units per day
+  const unitsPerDay = Math.ceil(units / totalWorkingDays);
+
+  // Generate schedule for the specific machine
+  const machineSchedule = [];
+  let currentUnit = 1;
+
+  workingDates.forEach((date) => {
+    const dateStr = format(date, "yyyy-MM-dd");
+    const isSun = isSunday(date);
+    const isHoliday = holidays.some((h) => h.date === dateStr);
+
+    if (!isSun && !isHoliday && currentUnit <= units) {
+      const unitsForDay = Math.min(unitsPerDay, units - currentUnit + 1);
+      machineSchedule.push({
+        date: dateStr,
+        units: unitsForDay,
+        startUnit: currentUnit,
+        endUnit: currentUnit + unitsForDay - 1,
+      });
+      currentUnit += unitsForDay;
+    }
   });
 
-  for (let unitIdx = 0; unitIdx < quantity; unitIdx++) {
-    let unitStartTime = parseISO(startDateTime);
-    for (let m = 0; m < machines.length; m++) {
-      const machine = machines[m];
-      const prevFinish = unitTimestamps[unitIdx][m - 1] || unitStartTime;
-      const machineAvailable = machineStates[m].availableTime;
-      let start = prevFinish > machineAvailable ? prevFinish : machineAvailable;
-
-      while (
-        isSunday(start) ||
-        !isWithinWorkingHours(start, dailyStart, dailyMinutes, holidays)
-      ) {
-        const nextDay = addDays(startOfDay(start), 1);
-        start = new Date(
-          nextDay.getFullYear(),
-          nextDay.getMonth(),
-          nextDay.getDate(),
-          dailyStart.getHours(),
-          dailyStart.getMinutes()
-        );
-      }
-
-      const end = addMinutes(start, machine.timePerUnit);
-      unitTimestamps[unitIdx][m] = end;
-      machineStates[m].availableTime = end;
-
-      schedule[machine.name].push({
-        unit: unitIdx + 1,
-        start,
-        end,
-        date: format(start, "yyyy-MM-dd"),
-      });
-    }
-  }
-
+  schedule[order.machineName] = machineSchedule;
   return schedule;
 }
 
 const WeeklyMachineSchedule = () => {
-  const [data, setData] = useState(null);
+  const [order, setOrder] = useState(null);
+  const [company, setCompany] = useState(null);
   const [dates, setDates] = useState([]);
-  const [machines, setMachines] = useState([]);
-  const [dailyMinutes, setDailyMinutes] = useState(0);
-  const [quantity, setQuantity] = useState(0);
   const [holidays, setHolidays] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { id } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
-    getCompanyData(id);
-    loadHolidays();
-  }, []);
+    loadData();
+  }, [id]);
 
-  const loadHolidays = async () => {
-    const holidayData = await window.holidayAPI.loadHolidays();
-    setHolidays(holidayData);
-  };
+  const loadData = async () => {
+    try {
+      setLoading(true);
 
-  const getCompanyData = (id) => {
-    window.machineAPI.getCompanies().then((companies) => {
-      const matchedCompany = companies.find((company) => company.id === id);
-      if (matchedCompany) {
-        setData(matchedCompany);
-        if (matchedCompany?.startDateTime && matchedCompany?.endDateTime) {
-          const workingDates = getWorkingDates(
-            matchedCompany.startDateTime,
-            matchedCompany.endDateTime
-          );
-          setDates(workingDates);
-        }
-        if (Array.isArray(matchedCompany?.machines)) {
-          const machineNames = matchedCompany.machines.map((m) => m.name);
-          setMachines(machineNames);
-        }
-        if (matchedCompany?.dailyHours) {
-          setDailyMinutes(parseInt(matchedCompany.dailyHours) * 60);
-        }
-        if (matchedCompany?.quantity) {
-          setQuantity(parseInt(matchedCompany.quantity));
-        }
+      // Load order data
+      const orderData = await window.orderAPI.getOrder(id);
+      if (!orderData) {
+        setError("Order not found");
+        return;
       }
-    });
+      setOrder(orderData);
+
+      // Load company data
+      const companies = await window.companyAPI.getCompanies();
+      const companyData = companies.find((c) => c.id === orderData.companyId);
+      setCompany(companyData);
+
+      // Load holidays
+      const holidayData = await window.holidayAPI.getHolidays();
+      setHolidays(holidayData);
+
+      // Generate working dates
+      if (orderData.startDate && orderData.endDate) {
+        const workingDates = getWorkingDates(
+          orderData.startDate,
+          orderData.endDate
+        );
+        setDates(workingDates);
+      }
+    } catch (error) {
+      console.error("Error loading data:", error);
+      setError("Failed to load order data");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const schedule = useMemo(() => {
-    if (
-      data?.machines &&
-      data?.startDateTime &&
-      dailyMinutes > 0 &&
-      quantity > 0
-    ) {
-      return assignTrueSequentialSchedule(
-        data.machines,
-        quantity,
-        data.startDateTime,
-        dailyMinutes,
-        holidays
-      );
+    if (order && company) {
+      return generateSchedule(order, company, holidays);
     }
     return {};
-  }, [data?.machines, data?.startDateTime, dailyMinutes, quantity, holidays]);
+  }, [order, company, holidays]);
+
+  const getTotalUnits = () => {
+    if (!schedule[order?.machineName]) return 0;
+    return schedule[order.machineName].reduce(
+      (total, day) => total + day.units,
+      0
+    );
+  };
+
+  const getProgressPercentage = () => {
+    if (!order) return 0;
+    const totalDays =
+      differenceInDays(parseISO(order.endDate), parseISO(order.startDate)) + 1;
+    const completedDays = dates.filter((date) => {
+      const dateStr = format(date, "yyyy-MM-dd");
+      return (
+        new Date(dateStr) <= new Date() &&
+        !isSunday(date) &&
+        !holidays.some((h) => h.date === dateStr)
+      );
+    }).length;
+    return Math.min((completedDays / totalDays) * 100, 100);
+  };
+
+  if (loading) {
+    return (
+      <div className="schedule-container">
+        <div className="loading-spinner">
+          <div className="spinner"></div>
+          <p>Loading schedule...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !order) {
+    return (
+      <div className="schedule-container">
+        <div className="error-state">
+          <AlertCircle size={48} className="error-icon" />
+          <h2>Error Loading Schedule</h2>
+          <p>{error || "Order not found"}</p>
+          <button onClick={() => navigate(-1)} className="back-btn">
+            <ChevronLeft size={16} />
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="schedule-container">
+      {/* Header Section */}
       <div className="schedule-header">
-        <button className="back-button" onClick={() => navigate(-1)}>
-          <ChevronLeft size={20} />
-          <span>Back</span>
-        </button>
-        <h2 className="schedule-title">
-          Machine Schedule{" "}
-          {dates.length > 0
-            ? `(${format(dates[0], "dd-MMM")} - ${format(
-                dates[dates.length - 1],
-                "dd-MMM"
-              )})`
-            : "(No working days)"}
-        </h2>
+        <div className="header-left">
+          <button className="back-button" onClick={() => navigate(-1)}>
+            <ChevronLeft size={20} />
+            <span>Back to Orders</span>
+          </button>
+          <div className="header-content">
+            <h1 className="schedule-title">
+              <Calendar size={28} />
+              Production Schedule
+            </h1>
+            <p className="schedule-subtitle">
+              {order.productName} - {order.machineName}
+            </p>
+          </div>
+        </div>
+        <div className="header-stats">
+          <div className="stat-item">
+            <Package size={20} />
+            <div>
+              <span className="stat-value">{getTotalUnits()}</span>
+              <span className="stat-label">Total Units</span>
+            </div>
+          </div>
+          <div className="stat-item">
+            <TrendingUp size={20} />
+            <div>
+              <span className="stat-value">
+                {getProgressPercentage().toFixed(1)}%
+              </span>
+              <span className="stat-label">Progress</span>
+            </div>
+          </div>
+        </div>
       </div>
 
+      {/* Order Details Card */}
+      <div className="order-details-card">
+        <div className="details-grid">
+          <div className="detail-item">
+            <Package size={16} />
+            <div>
+              <span className="detail-label">Product</span>
+              <span className="detail-value">{order.productName}</span>
+            </div>
+          </div>
+          <div className="detail-item">
+            <Settings size={16} />
+            <div>
+              <span className="detail-label">Machine</span>
+              <span className="detail-value">{order.machineName}</span>
+            </div>
+          </div>
+          <div className="detail-item">
+            <Calendar size={16} />
+            <div>
+              <span className="detail-label">Start Date</span>
+              <span className="detail-value">
+                {format(parseISO(order.startDate), "MMM dd, yyyy")}
+              </span>
+            </div>
+          </div>
+          <div className="detail-item">
+            <Calendar size={16} />
+            <div>
+              <span className="detail-label">End Date</span>
+              <span className="detail-value">
+                {format(parseISO(order.endDate), "MMM dd, yyyy")}
+              </span>
+            </div>
+          </div>
+          <div className="detail-item">
+            <Clock size={16} />
+            <div>
+              <span className="detail-label">Process</span>
+              <span className="detail-value">{order.processName}</span>
+            </div>
+          </div>
+          <div className="detail-item">
+            <Info size={16} />
+            <div>
+              <span className="detail-label">Status</span>
+              <span className={`status-badge status-${order.status}`}>
+                {order.status}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Schedule Table */}
       <div className="schedule-wrapper">
-        <table className="schedule-table">
-          <thead>
-            <tr className="schedule-thead-tr">
-              <th className="schedule-th schedule-th-left">Machine</th>
-              {dates.map((date) => {
+        <div className="schedule-table-header">
+          <h2>Production Timeline</h2>
+          <div className="schedule-info">
+            <span className="info-item">
+              <div className="color-indicator working"></div>
+              Working Days
+            </span>
+            <span className="info-item">
+              <div className="color-indicator holiday"></div>
+              Holidays
+            </span>
+            <span className="info-item">
+              <div className="color-indicator sunday"></div>
+              Sundays
+            </span>
+          </div>
+        </div>
+
+        <div className="schedule-table-container">
+          <table className="schedule-table">
+            <thead>
+              <tr className="schedule-thead-tr">
+                <th className="schedule-th schedule-th-left">Date</th>
+                <th className="schedule-th">Day</th>
+                <th className="schedule-th">Units</th>
+                <th className="schedule-th">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dates.map((date, index) => {
+                const dateStr = format(date, "yyyy-MM-dd");
                 const isSun = isSunday(date);
-                const isHoliday = holidays.some(
-                  (h) => h.date === format(date, "yyyy-MM-dd")
+                const isHoliday = holidays.some((h) => h.date === dateStr);
+                const daySchedule = schedule[order.machineName]?.find(
+                  (s) => s.date === dateStr
                 );
+
                 return (
-                  <th
-                    key={date.toISOString()}
-                    className={`schedule-th text-center ${
-                      isSun || isHoliday ? "sunday-header" : ""
+                  <tr
+                    key={dateStr}
+                    className={`schedule-tr ${
+                      isSun || isHoliday ? "non-working" : "working"
                     }`}
-                    style={
-                      isSun || isHoliday
-                        ? { backgroundColor: "#ffcccc", color: "#b00000" }
-                        : {}
-                    }
                   >
-                    {format(date, "dd-MMM")}
-                  </th>
+                    <td className="schedule-date">
+                      {format(date, "MMM dd, yyyy")}
+                    </td>
+                    <td className="schedule-day">
+                      {format(date, "EEEE")}
+                      {(isSun || isHoliday) && (
+                        <span className="day-indicator">
+                          {isSun ? "Sunday" : "Holiday"}
+                        </span>
+                      )}
+                    </td>
+                    <td className="schedule-units">
+                      {daySchedule ? (
+                        <div className="units-display">
+                          <span className="unit-count">
+                            {daySchedule.units}
+                          </span>
+                          <span className="unit-range">
+                            Units {daySchedule.startUnit}-{daySchedule.endUnit}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="no-units">No Production</span>
+                      )}
+                    </td>
+                    <td className="schedule-status">
+                      {daySchedule ? (
+                        <span className="status-working">Scheduled</span>
+                      ) : isSun ? (
+                        <span className="status-sunday">Sunday</span>
+                      ) : isHoliday ? (
+                        <span className="status-holiday">Holiday</span>
+                      ) : (
+                        <span className="status-idle">Idle</span>
+                      )}
+                    </td>
+                  </tr>
                 );
               })}
-            </tr>
-          </thead>
-          <tbody>
-            {machines.map((machine, machineIdx) => {
-              const color = getColorFromIndex(machineIdx);
-              return (
-                <tr key={machine} className="schedule-tr">
-                  <td className="schedule-machine-name">{machine}</td>
-                  {dates.map((date) => {
-                    const dateStr = format(date, "yyyy-MM-dd");
-                    const isSun = isSunday(date);
-                    const isHoliday = holidays.some((h) => h.date === dateStr);
-                    const unitsOnDate =
-                      schedule?.[machine]?.filter(
-                        (entry) => entry.date === dateStr
-                      ) || [];
-                    return (
-                      <td
-                        key={dateStr}
-                        className={`schedule-td ${
-                          isSun || isHoliday ? "sunday-cell" : ""
-                        }`}
-                        style={
-                          isSun || isHoliday
-                            ? { backgroundColor: "#ffe5e5" }
-                            : {}
-                        }
-                      >
-                        {unitsOnDate.length > 0 && (
-                          <div
-                            className="unit-count"
-                            style={{
-                              backgroundColor: color,
-                              color: "#fff",
-                              padding: "2px 6px",
-                              borderRadius: "4px",
-                              display: "inline-block",
-                            }}
-                          >
-                            {unitsOnDate.length} unit(s)
-                          </div>
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

@@ -53,6 +53,12 @@ interface Window {
     loadMachines: () => Promise<any[]>;
     getCompanies: () => Promise<any[]>;
   };
+  companyAPI: {
+    getCompanies: () => Promise<any[]>;
+    createCompany: (company: any) => Promise<any>;
+    updateCompany: (company: any) => Promise<any>;
+    deleteCompany: (id: string) => Promise<boolean>;
+  };
   componentAPI: {
     saveComponent: (componentData: any) => Promise<void>;
   };

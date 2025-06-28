@@ -7,6 +7,7 @@ import {
   FiLoader,
   FiAlertCircle,
   FiBriefcase,
+  FiPlus,
 } from "react-icons/fi";
 import "../style/companylist.css";
 import { useNavigate } from "react-router-dom";
@@ -18,7 +19,7 @@ const CompanyList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    window.machineAPI
+    window.companyAPI
       .getCompanies()
       .then((data) => {
         setCompanies(data);
@@ -32,7 +33,11 @@ const CompanyList = () => {
   }, []);
 
   const routeWithData = (id) => {
-    navigate(`/machine-schedule/${id}`);
+    navigate(`/company-orders/${id}`);
+  };
+
+  const handleAddOrder = (companyId) => {
+    navigate(`/add-order/${companyId}`);
   };
 
   if (loading)
@@ -99,21 +104,9 @@ const CompanyList = () => {
                   <div className="time-detail">
                     <div className="detail-label">
                       <FiCalendar className="detail-icon" />
-                      <span>Start Date</span>
+                      <span>GST Number</span>
                     </div>
-                    <p className="detail-value">
-                      {new Date(company?.startDateTime).toLocaleDateString()}
-                    </p>
-                  </div>
-
-                  <div className="time-detail">
-                    <div className="detail-label">
-                      <FiCalendar className="detail-icon" />
-                      <span>End Date</span>
-                    </div>
-                    <p className="detail-value">
-                      {new Date(company?.endDateTime).toLocaleDateString()}
-                    </p>
+                    <p className="detail-value">{company?.gst}</p>
                   </div>
 
                   <div className="time-detail">
@@ -121,7 +114,7 @@ const CompanyList = () => {
                       <FiClock className="detail-icon" />
                       <span>Daily Hours</span>
                     </div>
-                    <p className="detail-value">{company?.dailyHours}</p>
+                    <p className="detail-value">{company?.dailyHours} hours</p>
                   </div>
                 </div>
               </div>

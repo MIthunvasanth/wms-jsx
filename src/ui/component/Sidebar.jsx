@@ -12,6 +12,9 @@ import {
   FiLogOut,
   FiX,
   FiCheck,
+  FiBriefcase,
+  FiChevronLeft,
+  FiChevronRight,
 } from "react-icons/fi";
 import "./Sidebar.css";
 
@@ -31,6 +34,17 @@ const sidebarContent = {
   ],
   Master: [
     {
+      text: "Company",
+      path: "/company",
+      icon: <FiBriefcase />,
+      subRoutes: [
+        "/add-company",
+        "/edit-company",
+        "/company-orders",
+        "/add-order",
+      ],
+    },
+    {
       text: "Machine",
       path: "/list-comapany",
       icon: <FiPackage />,
@@ -47,7 +61,7 @@ const sidebarContent = {
   ],
 };
 
-function Sidebar({ user, setUser, activeTab }) {
+function Sidebar({ user, setUser, activeTab, isCollapsed, onToggle }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -84,10 +98,19 @@ function Sidebar({ user, setUser, activeTab }) {
     setShowLogoutConfirm(false);
   };
 
+  const toggleSidebar = () => {
+    onToggle(!isCollapsed);
+  };
+
   const navLinks = sidebarContent[activeTab] || [];
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
+      {/* Collapse Toggle Button */}
+      <button className="sidebar-toggle" onClick={toggleSidebar}>
+        {isCollapsed ? <FiChevronRight /> : <FiChevronLeft />}
+      </button>
+
       <nav className="sidebar-nav">
         {navLinks.map((link) => (
           <Link
@@ -102,25 +125,33 @@ function Sidebar({ user, setUser, activeTab }) {
                 ? "active"
                 : ""
             }`}
+            title={isCollapsed ? link.text : undefined}
           >
             <div className="sidebar-link-icon">{link.icon}</div>
             <span className="sidebar-link-text">{link.text}</span>
           </Link>
         ))}
       </nav>
+
       <div className="sidebar-footer">
         <div className="user-profile">
           <div className="user-avatar">
             {user?.name?.charAt(0).toUpperCase() || "U"}
           </div>
-          <div className="user-info">
-            <div className="user-name">{user?.name || "User"}</div>
-            <div className="user-role">Admin</div>
-          </div>
+          {!isCollapsed && (
+            <div className="user-info">
+              <div className="user-name">{user?.name || "User"}</div>
+              <div className="user-role">Admin</div>
+            </div>
+          )}
         </div>
-        <button className="logout-button" onClick={handleLogout}>
+        <button
+          className="logout-button"
+          onClick={handleLogout}
+          title={isCollapsed ? "Logout" : undefined}
+        >
           <FiLogOut className="logout-icon" />
-          <span>Logout</span>
+          {!isCollapsed && <span>Logout</span>}
         </button>
       </div>
 

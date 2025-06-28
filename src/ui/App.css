@@ -26,12 +26,26 @@ body {
   display: flex;
   flex-grow: 1;
   overflow: hidden; /* Prevent this level from scrolling */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Sidebar collapsed state */
+.app-content.sidebar-collapsed {
+  margin-left: -170px; /* Adjust based on sidebar collapsed width */
 }
 
 .main-content {
   flex-grow: 1;
   height: 100vh;
   overflow-y: auto;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-left: 0;
+}
+
+/* Adjust main content when sidebar is collapsed */
+.app-content.sidebar-collapsed .main-content {
+  padding-left: 0;
+  margin-left: 70px; /* Width of collapsed sidebar */
 }
 
 /* Custom scrollbar for a more integrated feel */
@@ -99,5 +113,26 @@ body {
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .app-content.sidebar-collapsed {
+    margin-left: -140px;
+  }
+
+  .app-content.sidebar-collapsed .main-content {
+    margin-left: 60px;
+  }
+}
+
+@media (max-width: 576px) {
+  .app-content.sidebar-collapsed {
+    margin-left: -130px;
+  }
+
+  .app-content.sidebar-collapsed .main-content {
+    margin-left: 50px;
   }
 }

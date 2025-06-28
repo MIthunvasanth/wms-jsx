@@ -18,6 +18,11 @@ contextBridge.exposeInMainWorld("dashboardAPI", {
   getOrderStatus: () => ipcRenderer.invoke("get-order-status"),
   getShiftPerformance: () => ipcRenderer.invoke("get-shift-performance"),
   getQualityAlerts: () => ipcRenderer.invoke("get-quality-alerts"),
+  getCompanyOrderStats: () => ipcRenderer.invoke("get-company-order-stats"),
+  getHolidayStats: () => ipcRenderer.invoke("get-holiday-stats"),
+  getMachineStatusDistribution: () =>
+    ipcRenderer.invoke("get-machine-status-distribution"),
+  getProcessStats: () => ipcRenderer.invoke("get-process-stats"),
 });
 
 contextBridge.exposeInMainWorld("holidayAPI", {
@@ -38,6 +43,15 @@ contextBridge.exposeInMainWorld("machineAPI", {
   getCompanies: () => ipcRenderer.invoke("get-companies"),
   updateMachine: (machine: any) =>
     ipcRenderer.invoke("update-machine", machine),
+});
+
+contextBridge.exposeInMainWorld("companyAPI", {
+  getCompanies: () => ipcRenderer.invoke("get-companies-list"),
+  createCompany: (company: any) =>
+    ipcRenderer.invoke("create-company", company),
+  updateCompany: (company: any) =>
+    ipcRenderer.invoke("update-company", company),
+  deleteCompany: (id: string) => ipcRenderer.invoke("delete-company", id),
 });
 
 contextBridge.exposeInMainWorld("componentAPI", {
@@ -67,6 +81,33 @@ contextBridge.exposeInMainWorld("electron", {
   getStaticData: () => ipcInvoke("getStaticData"),
   sendFrameAction: (payload) => ipcSend("sendFrameAction", payload),
 } satisfies Window["electron"]);
+
+contextBridge.exposeInMainWorld("orderAPI", {
+  getOrders: (companyId?: string) =>
+    ipcRenderer.invoke("get-orders", companyId),
+  getOrder: (id: string) => ipcRenderer.invoke("get-order", id),
+  createOrder: (orderData: any) =>
+    ipcRenderer.invoke("create-order", orderData),
+  updateOrder: (orderData: any) =>
+    ipcRenderer.invoke("update-order", orderData),
+  deleteOrder: (id: string) => ipcRenderer.invoke("delete-order", id),
+  resolveConflictAndCreateOrder: (data: any) =>
+    ipcRenderer.invoke("resolve-conflict-and-create-order", data),
+});
+
+contextBridge.exposeInMainWorld("processAPI", {
+  getProcesses: () => ipcRenderer.invoke("get-processes"),
+  getProcess: (id: string) => ipcRenderer.invoke("get-process", id),
+  createProcess: (processData: any) =>
+    ipcRenderer.invoke("create-process", processData),
+  updateProcess: (processData: any) =>
+    ipcRenderer.invoke("update-process", processData),
+  deleteProcess: (id: string) => ipcRenderer.invoke("delete-process", id),
+  getMachinesByProcess: (processId: string) =>
+    ipcRenderer.invoke("get-machines-by-process", processId),
+  getCompanyMachines: (companyId: string) =>
+    ipcRenderer.invoke("get-company-machines", companyId),
+});
 
 function ipcInvoke<Key extends keyof EventPayloadMapping>(
   key: Key
